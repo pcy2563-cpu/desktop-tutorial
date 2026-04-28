@@ -691,9 +691,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
-function saveCredentials(phone, password) {
+function saveCredentials(phone) {
   localStorage.setItem(REMEMBER_PHONE_KEY, phone);
-  localStorage.setItem(REMEMBER_PASS_KEY, password);
+  localStorage.removeItem(REMEMBER_PASS_KEY);
 }
 
 function clearSavedCredentials() {
@@ -712,18 +712,12 @@ async function trySavedLogin() {
       localStorage.removeItem(LEGACY_REMEMBER_USER_KEY);
     }
   }
-  const p = localStorage.getItem(REMEMBER_PASS_KEY);
-  if (!phone || !p) return;
-  try {
-    const data = await forumAPI.login(phone, p);
-    currentUser = data.data;
-    persistUser(currentUser);
-    updateUserUI();
-  } catch {
-    clearSavedCredentials();
-    persistUser(null);
-    currentUser = null;
-    updateUserUI();
+  localStorage.removeItem(REMEMBER_PASS_KEY);
+  if (!phone) return;
+
+  const phoneInput = document.getElementById('loginPhone');
+  if (phoneInput && !phoneInput.value) {
+    phoneInput.value = phone;
   }
 }
 
@@ -733,6 +727,14 @@ function initUser() {
   try {
     currentUser = JSON.parse(raw);
     if (!currentUser || !currentUser.id) currentUser = null;
+    if (currentUser && !currentUser.authToken) {
+      localStorage.removeItem(USER_KEY);
+      currentUser = null;
+    }
+    if (currentUser && String(currentUser.role || '') === 'admin' && !currentUser.adminToken) {
+      localStorage.removeItem(USER_KEY);
+      currentUser = null;
+    }
     updateUserUI();
   } catch {
     localStorage.removeItem(USER_KEY);
@@ -750,6 +752,14 @@ function persistUser(user) {
 
 function isAdminUser() {
   return currentUser && String(currentUser.role || '') === 'admin';
+}
+
+function getAdminToken() {
+  if (!isAdminUser() || !currentUser || !currentUser.adminToken) {
+    showToast('管理员登录已过期，请重新登录');
+    return '';
+  }
+  return currentUser.adminToken;
 }
 
 function updateUserUI() {
@@ -775,7 +785,7 @@ function updateUserUI() {
           <div class="profile-account-meta">
             <h3>${name}${adminTag}${muteTag}</h3>
             <p>${escapeHtml(masked || '未绑定手机号')}</p>
-            <span class="profile-account-tip">${isAdminUser() ? '可进入管理员入口。' : '可进入画像和分析。'}</span>
+            <span class="profile-account-tip">${isAdminUser() ? '可进入管理员入口、个人博客和分析页。' : '可进入个人博客、画像和分析。'}</span>
           </div>
         </div>
         <div class="profile-account-stats">
@@ -1032,6 +1042,10 @@ function openDashboardPage() {
 
 function openBehaviorPage() {
   switchTab('behavior');
+}
+
+function openLearningPage() {
+  window.location.href = '/blog/#learningSection';
 }
 
 function openAdminBannerPage() {
@@ -2837,7 +2851,7 @@ async function login() {
     const data = await forumAPI.login(phone, password);
     currentUser = data.data;
     persistUser(currentUser);
-    saveCredentials(phone, password);
+    saveCredentials(phone);
     ensureContentCenterUserState();
     updateUserUI();
     publicDashboardStatsCache = null;
@@ -2883,7 +2897,7 @@ async function register() {
     const data = await forumAPI.register(phone, password, nickname);
     currentUser = data.data;
     persistUser(currentUser);
-    saveCredentials(phone, password);
+    saveCredentials(phone);
     ensureContentCenterUserState();
     updateUserUI();
     publicDashboardStatsCache = null;
@@ -3272,7 +3286,9 @@ async function adminSaveBranding() {
   }
 
   try {
-    const res = await forumAPI.adminSaveSiteBranding(currentUser.id, {
+    const adminToken = getAdminToken();
+    if (!adminToken) return;
+    const res = await forumAPI.adminSaveSiteBranding(adminToken, {
       mode,
       logoText,
       logoTextBase64: encodeUtf8Base64(logoText),
@@ -3288,7 +3304,9 @@ async function adminSaveBranding() {
 async function adminResetBranding() {
   if (!currentUser || !isAdminUser()) return;
   try {
-    const res = await forumAPI.adminSaveSiteBranding(currentUser.id, {
+    const adminToken = getAdminToken();
+    if (!adminToken) return;
+    const res = await forumAPI.adminSaveSiteBranding(adminToken, {
       mode: 'text',
       logoText: '通',
       logoTextBase64: encodeUtf8Base64('通'),
@@ -3361,7 +3379,9 @@ async function adminSaveAnnouncement() {
   }
 
   try {
-    const res = await forumAPI.adminSaveSiteAnnouncement(currentUser.id, {
+    const adminToken = getAdminToken();
+    if (!adminToken) return;
+    const res = await forumAPI.adminSaveSiteAnnouncement(adminToken, {
       enabled: enabled ? 1 : 0,
       title,
       body,
@@ -3383,7 +3403,9 @@ async function loadAdminBannerPanel() {
   updateAdminBannerHeroMeta([]);
   syncAdminBrandingForm();
   try {
-    const res = await forumAPI.adminBannersList(currentUser.id);
+    const adminToken = getAdminToken();
+    if (!adminToken) return;
+    const res = await forumAPI.adminBannersList(adminToken);
     const rows = res.data || [];
     updateAdminBannerHeroMeta(rows);
     if (rows.length === 0) {
@@ -3417,7 +3439,9 @@ async function loadAdminDashboardStats() {
   if (!el) return;
   el.innerHTML = '<div class="admin-loading">统计中…</div>';
   try {
-    const res = await forumAPI.adminDashboardStats(currentUser.id);
+    const adminToken = getAdminToken();
+    if (!adminToken) return;
+    const res = await forumAPI.adminDashboardStats(adminToken);
     const summary = res.data?.summary || {};
     const hotPosts = Array.isArray(res.data?.hot_posts) ? res.data.hot_posts : [];
     const contentSegments = Array.isArray(res.data?.content_segments) ? res.data.content_segments : [];
@@ -4209,7 +4233,9 @@ async function adminAddBanner() {
   }
 
   try {
-    await forumAPI.adminBannerSave(currentUser.id, {
+    const adminToken = getAdminToken();
+    if (!adminToken) return;
+    await forumAPI.adminBannerSave(adminToken, {
       id: 0,
       title,
       image,
@@ -4232,7 +4258,9 @@ async function adminDeleteBanner(id) {
   if (!isAdminUser() || !currentUser) return;
   if (!confirm('确定删除该轮播吗？如果这张图没有被其他内容使用，也会一起清理。')) return;
   try {
-    await forumAPI.adminBannerDelete(currentUser.id, id);
+    const adminToken = getAdminToken();
+    if (!adminToken) return;
+    await forumAPI.adminBannerDelete(adminToken, id);
     showToast('轮播已删除');
     await loadAdminBannerPanel();
     await loadHomeBanners();
@@ -4289,7 +4317,9 @@ async function adminSearchUsers(silent = false) {
     resultEl.innerHTML = '<div class="admin-loading">查询中…</div>';
   }
   try {
-    const res = await forumAPI.adminSearchUsers(currentUser.id, keyword);
+    const adminToken = getAdminToken();
+    if (!adminToken) return;
+    const res = await forumAPI.adminSearchUsers(adminToken, keyword);
     renderAdminSearchResults(Array.isArray(res.data) ? res.data : []);
   } catch (e) {
     if (resultEl) {
@@ -4311,7 +4341,9 @@ async function adminSetMute(muted, userId = 0) {
     const payload = { muted };
     if (Number(userId) > 0) payload.userId = Number(userId);
     else payload.phone = phone;
-    const result = await forumAPI.adminMuteUser(currentUser.id, payload);
+    const adminToken = getAdminToken();
+    if (!adminToken) return;
+    const result = await forumAPI.adminMuteUser(adminToken, payload);
     showToast(muted ? '已禁言' : '已解除禁言');
     const targetPhone = result?.data?.phone || phone;
     if (currentUser.phone === targetPhone) {
@@ -4522,7 +4554,9 @@ async function showAdminPostAuthorInfo(postId, event) {
   openModal('adminPostInfoModal');
 
   try {
-    const res = await forumAPI.adminPostAuthorInfo(currentUser.id, postId);
+    const adminToken = getAdminToken();
+    if (!adminToken) return;
+    const res = await forumAPI.adminPostAuthorInfo(adminToken, postId);
     renderAdminPostInfo(res.data || {});
   } catch (error) {
     if (bodyEl) {

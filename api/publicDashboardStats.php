@@ -1,5 +1,6 @@
 <?php
 include 'config.php';
+include 'require_admin.php';
 
 if (!function_exists('dashboard_behavior_focus_label')) {
     function dashboard_behavior_focus_label(string $type): string
@@ -17,14 +18,12 @@ if (!function_exists('dashboard_behavior_focus_label')) {
     }
 }
 
-$userId = isset($_GET['userId']) ? (int) $_GET['userId'] : 0;
 $isAdmin = false;
+$adminUserId = 0;
 
-if ($userId > 0) {
-    $userStmt = $pdo->prepare('SELECT role FROM users WHERE id = ? LIMIT 1');
-    $userStmt->execute([$userId]);
-    $role = (string) $userStmt->fetchColumn();
-    $isAdmin = $role === 'admin';
+if (read_admin_token() !== '') {
+    $adminUserId = require_admin($pdo);
+    $isAdmin = $adminUserId > 0;
 }
 
 $summary = [

@@ -1,9 +1,12 @@
 <?php
 include 'config.php';
+include 'require_admin.php';
 
 $debug = isset($_GET['debug']) || isset($_POST['debug']);
 
 $userId = isset($_POST['userId']) ? (int) $_POST['userId'] : 0;
+$userId = require_user($pdo, $userId);
+enforce_rate_limit($pdo, 'upload_image', 40, 3600, (string) $userId);
 if ($userId <= 0) {
     sendResponse(0, 'Not logged in');
 }
@@ -51,18 +54,11 @@ $mimeType = strtolower(trim((string) $mimeType));
 $allowedMimeTypes = [
     'image/jpeg', 'image/jpg', 'image/pjpeg', 'image/jfif',
     'image/png', 'image/x-png',
-    'image/gif',
     'image/webp',
-    'image/bmp', 'image/x-bmp', 'image/x-ms-bmp',
-    'image/tiff', 'image/x-tiff',
-    'image/svg+xml',
-    'image/x-icon', 'image/vnd.microsoft.icon',
-    'image/avif',
-    'image/heic', 'image/heif',
 ];
 
 if (!in_array($mimeType, $allowedMimeTypes, true)) {
-    sendResponse(0, 'Unsupported image format');
+    sendResponse(0, 'Unsupported image format. Please upload JPG, PNG, or WEBP.');
 }
 
 $extensionMap = [
@@ -72,19 +68,7 @@ $extensionMap = [
     'image/jfif' => 'jpg',
     'image/png' => 'png',
     'image/x-png' => 'png',
-    'image/gif' => 'gif',
     'image/webp' => 'webp',
-    'image/bmp' => 'bmp',
-    'image/x-bmp' => 'bmp',
-    'image/x-ms-bmp' => 'bmp',
-    'image/tiff' => 'tiff',
-    'image/x-tiff' => 'tiff',
-    'image/svg+xml' => 'svg',
-    'image/x-icon' => 'ico',
-    'image/vnd.microsoft.icon' => 'ico',
-    'image/avif' => 'avif',
-    'image/heic' => 'heic',
-    'image/heif' => 'heif',
 ];
 
 $extension = $extensionMap[$mimeType] ?? strtolower((string) pathinfo($originalName, PATHINFO_EXTENSION));

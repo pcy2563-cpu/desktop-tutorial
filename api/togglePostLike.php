@@ -1,9 +1,12 @@
 <?php
 include 'config.php';
+include 'require_admin.php';
 include 'behavior_logger.php';
 
 $postId = isset($_POST['postId']) ? (int) $_POST['postId'] : 0;
 $userId = isset($_POST['userId']) ? (int) $_POST['userId'] : 0;
+$userId = require_user($pdo, $userId);
+enforce_rate_limit($pdo, 'toggle_like', 120, 600, (string) $userId);
 
 if ($postId <= 0 || $userId <= 0) {
     echo json_encode(['code' => 0, 'msg' => 'Invalid parameters']);

@@ -1,10 +1,13 @@
 ﻿<?php
 include 'config.php';
+include 'require_admin.php';
 include 'user_mute_guard.php';
 include 'sensitive_words.php';
 include 'behavior_logger.php';
 
 $userId = isset($_POST['userId']) ? (int) $_POST['userId'] : 0;
+$userId = require_user($pdo, $userId);
+enforce_rate_limit($pdo, 'create_post', 20, 600, (string) $userId);
 $title = isset($_POST['title']) ? trim($_POST['title']) : '';
 $content = isset($_POST['content']) ? trim($_POST['content']) : '';
 $categoryId = isset($_POST['categoryId']) ? (int) $_POST['categoryId'] : 0;

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0f766e">
   <meta name="description" content="浅显通校园论坛 — 校园交流、内容发布与互动推荐平台">
   <title>浅显通校园论坛</title>
-  <link rel="stylesheet" href="css/style.css?v=20260421i">
+    <link rel="stylesheet" href="css/style.css?v=20260428authfix">
 </head>
 <body>
   <div id="appShell">
@@ -189,6 +189,17 @@
                   <span class="profile-entry-arrow">进入</span>
                 </div>
                 <p id="profileDashboardEntryHint">查看分析。</p>
+              </div>
+            </button>
+
+            <button type="button" class="profile-entry-card profile-entry-card--learning" onclick="openLearningPage()">
+              <span class="profile-entry-icon" aria-hidden="true">学</span>
+              <div class="profile-entry-copy">
+                <div class="profile-entry-head">
+                  <h3>个人博客</h3>
+                  <span class="profile-entry-arrow">进入</span>
+                </div>
+                <p id="profileLearningEntryHint">成长、项目、技能与笔记。</p>
               </div>
             </button>
           </div>
@@ -663,8 +674,15 @@
   </div>
   </div>
 
-  <script src="js/api.js?v=20260421i"></script>
-  <script src="js/main.js?v=20260421i"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
+    <script src="js/api.js?v=20260428authfix"></script>
+    <script src="js/main.js?v=20260428authfix"></script>
 </body>
 </html>
 

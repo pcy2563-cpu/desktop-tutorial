@@ -38,7 +38,7 @@ function branding_payload(string $mode, string $text, string $image): array
 }
 
 $adminUserId = isset($_POST['adminUserId']) ? (int) $_POST['adminUserId'] : 0;
-require_admin($pdo, $adminUserId);
+$adminUserId = require_admin($pdo, $adminUserId);
 
 ensure_site_settings_table($pdo);
 
@@ -76,6 +76,10 @@ $upsert = $pdo->prepare(
 $upsert->execute(['header_logo_type', $branding['mode']]);
 $upsert->execute(['header_logo_text', 'b64:' . base64_encode($branding['text'])]);
 $upsert->execute(['header_logo_image', $branding['image']]);
+log_admin_action($pdo, $adminUserId, 'site_branding_save', 'site_settings', 'header_logo', [
+    'mode' => $branding['mode'],
+    'text' => $branding['text'],
+]);
 
 echo json_encode([
     'code' => 1,

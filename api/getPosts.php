@@ -1,9 +1,13 @@
 ﻿<?php
 include 'config.php';
+include 'require_admin.php';
 include 'behavior_logger.php';
 
 $categoryId = isset($_GET['categoryId']) ? (int) $_GET['categoryId'] : 0;
 $userId = isset($_GET['userId']) ? (int) $_GET['userId'] : 0;
+if ($userId > 0) {
+    $userId = require_user($pdo, $userId);
+}
 $keyword = isset($_GET['q']) ? trim($_GET['q']) : '';
 $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 $pageSize = isset($_GET['pageSize']) ? (int) $_GET['pageSize'] : 8;

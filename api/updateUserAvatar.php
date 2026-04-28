@@ -1,7 +1,10 @@
 <?php
 include 'config.php';
+include 'require_admin.php';
 
 $userId = isset($_POST['userId']) ? (int) $_POST['userId'] : 0;
+$userId = require_user($pdo, $userId);
+enforce_rate_limit($pdo, 'update_avatar', 30, 3600, (string) $userId);
 $avatar = isset($_POST['avatar']) ? trim((string) $_POST['avatar']) : '';
 
 if ($userId <= 0 || $avatar === '') {

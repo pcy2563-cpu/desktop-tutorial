@@ -1,8 +1,10 @@
 <?php
 include 'config.php';
+include 'require_admin.php';
 include 'behavior_insights.php';
 
 $userId = isset($_GET['userId']) ? (int) $_GET['userId'] : 0;
+$userId = require_user($pdo, $userId);
 
 if ($userId <= 0) {
     echo json_encode(['code' => 0, 'msg' => "\u{53C2}\u{6570}\u{9519}\u{8BEF}"]);

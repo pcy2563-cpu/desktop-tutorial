@@ -1,5 +1,6 @@
 <?php
 include 'config.php';
+include 'require_admin.php';
 include 'behavior_insights.php';
 
 $userId = isset($_GET['userId']) ? (int) $_GET['userId'] : 0;
@@ -16,6 +17,7 @@ $snapshot = [
 ];
 
 if ($userId > 0) {
+    $userId = require_user($pdo, $userId);
     $userStmt = $pdo->prepare('SELECT id FROM users WHERE id = ? LIMIT 1');
     $userStmt->execute([$userId]);
     if ($userStmt->fetch()) {

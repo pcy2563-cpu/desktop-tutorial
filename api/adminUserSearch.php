@@ -3,7 +3,7 @@ include 'config.php';
 include 'require_admin.php';
 
 $adminUserId = isset($_POST['adminUserId']) ? (int) $_POST['adminUserId'] : 0;
-require_admin($pdo, $adminUserId);
+$adminUserId = require_admin($pdo, $adminUserId);
 
 $keyword = isset($_POST['keyword']) ? trim($_POST['keyword']) : '';
 if ($keyword === '') {

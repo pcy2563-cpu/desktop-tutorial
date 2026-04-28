@@ -19,7 +19,7 @@ if (!function_exists('dashboard_behavior_focus_label')) {
 }
 
 $adminUserId = isset($_POST['adminUserId']) ? (int) $_POST['adminUserId'] : 0;
-require_admin($pdo, $adminUserId);
+$adminUserId = require_admin($pdo, $adminUserId);
 
 $summary = [
     'users' => (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn(),

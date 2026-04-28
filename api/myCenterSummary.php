@@ -1,8 +1,10 @@
 <?php
 include 'config.php';
+include 'require_admin.php';
 include 'content_center_helper.php';
 
 $userId = isset($_GET['userId']) ? (int) $_GET['userId'] : 0;
+$userId = require_user($pdo, $userId);
 cc_assert_valid_user($pdo, $userId);
 
 $postSummaryStmt = $pdo->prepare(

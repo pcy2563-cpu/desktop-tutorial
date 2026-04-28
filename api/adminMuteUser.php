@@ -1,9 +1,9 @@
-﻿<?php
+<?php
 include 'config.php';
 include 'require_admin.php';
 
 $adminUserId = isset($_POST['adminUserId']) ? (int) $_POST['adminUserId'] : 0;
-require_admin($pdo, $adminUserId);
+$adminUserId = require_admin($pdo, $adminUserId);
 
 $userId = isset($_POST['userId']) ? (int) $_POST['userId'] : 0;
 $phone = isset($_POST['phone']) ? trim($_POST['phone']) : '';
@@ -45,6 +45,10 @@ if ((int) $user['id'] === $adminUserId) {
 }
 
 $pdo->prepare('UPDATE users SET is_muted = ? WHERE id = ?')->execute([$muted, (int) $user['id']]);
+log_admin_action($pdo, $adminUserId, $muted ? 'user_mute' : 'user_unmute', 'user', (string) $user['id'], [
+    'phone' => $user['phone'] ?? '',
+    'nickname' => $user['nickname'] ?? '',
+]);
 echo json_encode([
     'code' => 1,
     'msg' => $muted ? '已禁言' : '已解除禁言',

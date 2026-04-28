@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="description" content="浅显博客，一个适合沉淀学习、项目、笔记、感悟与成长时间线的通用博客项目。">
+  <title>浅显博客 | 学习型博客项目</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=20260423f">
+</head>
+<body>
+  <div class="site-noise" aria-hidden="true"></div>
+  <div class="site-glow site-glow--left" aria-hidden="true"></div>
+  <div class="site-glow site-glow--right" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-mark">浅</span>
+      <div>
+        <strong>浅显博客</strong>
+        <span>学习型博客项目</span>
+      </div>
+    </div>
+
+    <nav class="topbar-nav" aria-label="站点导航">
+      <a href="#home" data-route-link="home">首页</a>
+      <a href="#articles" data-route-link="articles">文章</a>
+      <a href="#projects" data-route-link="projects">项目</a>
+      <a href="#skills" data-route-link="skills">技能树</a>
+      <a href="#notes" data-route-link="notes">笔记</a>
+      <a href="#learning" data-route-link="learning">学习台</a>
+      <a href="#reflections" data-route-link="reflections">感悟</a>
+      <a href="#timeline" data-route-link="timeline">时间线</a>
+    </nav>
+
+    <div class="topbar-actions">
+      <button type="button" id="adminEntryBtn" class="ghost-btn hidden" onclick="openAdminStudio()">内容管理</button>
+      <a class="ghost-btn" href="/" target="_self">返回论坛</a>
+    </div>
+
+    <button
+      type="button"
+      class="mobile-menu-toggle"
+      id="mobileMenuToggle"
+      aria-label="打开导航菜单"
+      aria-expanded="false"
+      aria-controls="mobileMenuDrawer"
+      onclick="toggleMobileMenu()"
+    >
+      <span class="mobile-menu-bars" aria-hidden="true">
+        <i></i>
+        <i></i>
+        <i></i>
+      </span>
+    </button>
+  </header>
+
+  <div id="mobileMenuBackdrop" class="mobile-menu-backdrop" onclick="toggleMobileMenu(false)"></div>
+  <aside id="mobileMenuDrawer" class="mobile-menu-drawer" aria-hidden="true">
+    <div class="mobile-menu-head">
+      <div class="mobile-menu-brand">
+        <span class="brand-mark">浅</span>
+        <div>
+          <strong>浅显博客</strong>
+          <span>学习型博客项目</span>
+        </div>
+      </div>
+      <button type="button" class="mobile-menu-close" aria-label="关闭导航菜单" onclick="toggleMobileMenu(false)">×</button>
+    </div>
+
+    <nav class="mobile-menu-links" aria-label="移动端导航">
+      <a href="#home" data-route-link="home" style="--nav-index:1;" onclick="toggleMobileMenu(false)">首页</a>
+      <a href="#articles" data-route-link="articles" style="--nav-index:2;" onclick="toggleMobileMenu(false)">文章</a>
+      <a href="#projects" data-route-link="projects" style="--nav-index:3;" onclick="toggleMobileMenu(false)">项目</a>
+      <a href="#skills" data-route-link="skills" style="--nav-index:4;" onclick="toggleMobileMenu(false)">技能树</a>
+      <a href="#notes" data-route-link="notes" style="--nav-index:5;" onclick="toggleMobileMenu(false)">笔记</a>
+      <a href="#learning" data-route-link="learning" style="--nav-index:6;" onclick="toggleMobileMenu(false)">学习台</a>
+      <a href="#reflections" data-route-link="reflections" style="--nav-index:7;" onclick="toggleMobileMenu(false)">感悟</a>
+      <a href="#timeline" data-route-link="timeline" style="--nav-index:8;" onclick="toggleMobileMenu(false)">时间线</a>
+    </nav>
+
+    <div class="mobile-menu-actions">
+      <button type="button" id="mobileAdminEntryBtn" class="ghost-btn hidden" onclick="openAdminStudio()">内容管理</button>
+      <a class="ghost-btn" href="/" target="_self" onclick="toggleMobileMenu(false)">返回论坛</a>
+    </div>
+  </aside>
+
+  <main class="page-shell">
+    <section id="heroSection" class="hero-section" data-route="home">
+      <div class="hero-copy">
+        <p class="section-kicker">通用博客框架</p>
+        <h1 id="heroTitle">把学习、项目和思考整理成长期可复用的内容资产</h1>
+        <p id="heroSummary" class="hero-summary">浅显博客是一个可直接作为项目上传 Git 的学习型博客模板。它支持文章、项目、技能树、笔记、感悟和成长时间线，但当前默认不预置任何个人内容。</p>
+        <div class="hero-actions">
+          <a class="primary-btn" href="#projects">查看项目模块</a>
+          <a class="secondary-btn" href="#articles">进入文章模块</a>
+        </div>
+        <div id="heroFocusList" class="hero-focus-list"></div>
+      </div>
+
+      <aside class="hero-panel">
+        <div class="hero-panel-orbit">
+          <div class="hero-panel-ring hero-panel-ring--outer"></div>
+          <div class="hero-panel-ring hero-panel-ring--inner"></div>
+          <div class="hero-panel-core">
+            <span class="hero-panel-core-label">当前站点</span>
+            <strong id="heroName">浅显博客</strong>
+            <small id="heroMantra">克制、耐看、适合长期学习记录。</small>
+          </div>
+          <span class="hero-satellite hero-satellite--a">项目</span>
+          <span class="hero-satellite hero-satellite--b">笔记</span>
+          <span class="hero-satellite hero-satellite--c">时间线</span>
+        </div>
+        <div id="heroMetrics" class="hero-metrics"></div>
+      </aside>
+    </section>
+
+    <section class="section-block home-overview" id="homeOverviewSection" data-route="home">
+      <div class="section-head">
+        <div class="section-head-main">
+          <p class="section-kicker">模块入口</p>
+          <h2>首页只做中枢，各模块独立展开</h2>
+        </div>
+        <div class="section-head-side">
+          <p>这里没有预置文章、项目和个人资料。当前展示的是一套完整的博客框架，后续内容都可以通过后台分模块自行上传和维护。</p>
+        </div>
+      </div>
+      <div id="hubGrid" class="hub-grid"></div>
+    </section>
+
+    <section class="section-block route-panel hidden" id="articlesSection" data-route="articles">
+      <div class="section-head">
+        <div class="section-head-main">
+          <p class="section-kicker">文章专栏</p>
+          <h2>适合沉淀复盘、方法论和正式输出</h2>
+        </div>
+        <div class="section-head-side">
+          <p>默认没有任何预置文章。你可以后续自行发布项目复盘、课程总结、阅读记录和阶段思考。</p>
+          <button type="button" class="ghost-btn admin-only hidden" onclick="launchStudioCreate('articles')">发布文章</button>
+        </div>
+      </div>
+      <div id="articlesFeatured" class="articles-featured"></div>
+      <div id="articlesGrid" class="articles-grid"></div>
+    </section>
+
+    <section class="section-block route-panel hidden" id="projectsSection" data-route="projects">
+      <div class="section-head">
+        <div class="section-head-main">
+          <p class="section-kicker">项目仓库</p>
+          <h2>用接近 Git 仓库的方式展示项目</h2>
+        </div>
+        <div class="section-head-side">
+          <p>项目页会按仓库风格展示状态、分支、更新时间、README 亮点和对外链接，更适合做作品集和展示型项目页。</p>
+          <button type="button" class="ghost-btn admin-only hidden" onclick="launchStudioCreate('projects')">新增项目</button>
+        </div>
+      </div>
+      <div id="projectFilters" class="filter-row"></div>
+      <div id="projectsGrid" class="projects-grid"></div>
+    </section>
+
+    <section class="section-block route-panel hidden" id="skillsSection" data-route="skills">
+      <div class="section-head">
+        <div class="section-head-main">
+          <p class="section-kicker">技能树</p>
+          <h2>用思维导图方式整理你的能力结构</h2>
+        </div>
+        <div class="section-head-side">
+          <p>默认没有技能节点。你可以后续将前端、后端、数据分析、部署等能力按分支逐步补充进去。</p>
+          <button type="button" class="ghost-btn admin-only hidden" onclick="openAdminStudioTab('skills')">调整技能树</button>
+        </div>
+      </div>
+      <div id="skillsMindmap" class="skills-mindmap"></div>
+      <div id="skillsInspector" class="skills-inspector glass-card"></div>
+    </section>
+
+    <section class="section-block route-panel hidden" id="notesSection" data-route="notes">
+      <div class="section-head">
+        <div class="section-head-main">
+          <p class="section-kicker">笔记资源库</p>
+          <h2>点开像翻书一样阅读和整理笔记</h2>
+        </div>
+        <div class="section-head-side">
+          <p>笔记模块支持目录、章节和资源文件，但当前默认为空。后续你可以把课程笔记、项目文档和阅读整理都放进来。</p>
+          <button type="button" class="ghost-btn admin-only hidden" onclick="launchStudioCreate('notes')">写新笔记</button>
+        </div>
+      </div>
+      <div class="notes-toolbar">
+        <input type="search" id="noteSearchInput" class="search-input" placeholder="搜索笔记标题、分类、标签或章节" maxlength="60">
+        <button type="button" class="ghost-btn" onclick="applyNoteSearch()">搜索</button>
+      </div>
+      <div id="notesShelf" class="notes-shelf"></div>
+    </section>
+
+    <section class="section-block learning-section route-panel hidden" id="learningSection" data-route="learning">
+      <div class="section-head">
+        <div class="section-head-main">
+          <p class="section-kicker">学习台</p>
+          <h2>保留一个轻量的学习进度中控区</h2>
+        </div>
+        <div class="section-head-side">
+          <p>这里不再放个人化路线图，而是保留一个空白学习台，方便后续扩展成课程跟踪、阶段目标和学习记录模块。</p>
+        </div>
+      </div>
+      <div id="learningHeroMeta" class="learning-hero-meta"></div>
+      <div class="learning-grid">
+        <article id="learningCurrentCard" class="glass-card learning-card learning-card--highlight"></article>
+        <article id="learningRhythmCard" class="glass-card learning-card"></article>
+        <article id="learningRoadmapCard" class="glass-card learning-card learning-card--wide"></article>
+        <article id="learningHistoryCard" class="glass-card learning-card"></article>
+        <article id="learningMilestoneCard" class="glass-card learning-card"></article>
+      </div>
+    </section>
+
+    <section class="section-block route-panel hidden" id="reflectionsSection" data-route="reflections">
+      <div class="section-head">
+        <div class="section-head-main">
+          <p class="section-kicker">阶段感悟</p>
+          <h2>像动态流一样记录不同阶段的想法</h2>
+        </div>
+        <div class="section-head-side">
+          <p>感悟区支持时间、地点、情绪和图片，但当前没有预置任何内容。后续可以作为个人成长记录、项目心路或阶段想法的时间流。</p>
+          <button type="button" class="ghost-btn admin-only hidden" onclick="launchStudioCreate('reflections')">记录感悟</button>
+        </div>
+      </div>
+      <div id="reflectionTimelineFilters" class="timeline-filter-row"></div>
+      <div id="reflectionsList" class="reflections-list"></div>
+    </section>
+
+    <section class="section-block route-panel hidden" id="timelineSection" data-route="timeline">
+      <div class="section-head">
+        <div class="section-head-main">
+          <p class="section-kicker">成长时间线</p>
+          <h2>用时间维度串起阶段节点和内容入口</h2>
+        </div>
+        <div class="section-head-side">
+          <p>时间线可以联动感悟、项目和阶段记录。目前它作为空白框架存在，方便后续补充你的真实成长轨迹。</p>
+          <button type="button" class="ghost-btn admin-only hidden" onclick="launchStudioCreate('timeline')">维护时间线</button>
+        </div>
+      </div>
+      <div class="timeline-layout">
+        <article id="timelineSummary" class="glass-card timeline-summary"></article>
+        <div id="timelineList" class="timeline-list"></div>
+      </div>
+    </section>
+
+    <section id="adminStudioSection" class="section-block admin-studio hidden" data-route="studio" data-open="0">
+      <div class="section-head">
+        <div class="section-head-main">
+          <p class="section-kicker">内容管理</p>
+          <h2>分模块维护博客，不把所有内容挤在一个后台里</h2>
+        </div>
+        <div class="section-head-side">
+          <p>这里按文章、项目、技能树、笔记、感悟、时间线拆成独立标签页。当前默认内容为空，适合直接作为模板项目继续开发。</p>
+        </div>
+      </div>
+      <div class="admin-toolbar">
+        <button type="button" class="primary-btn" onclick="saveBlogStudio()">保存博客</button>
+        <button type="button" class="ghost-btn" onclick="reloadBlogStudio()">重新载入</button>
+      </div>
+      <div id="adminStudioRoot" class="admin-studio-root"></div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div>
+      <strong>浅显博客 | 学习型博客项目</strong>
+      <p>一个适合长期记录项目、学习和思考的通用博客项目框架。</p>
+    </div>
+    <div class="footer-links">
+      <a id="footerGithubLink" href="https://github.com/pcy2563-cpu/desktop-tutorial" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="#home">回到首页</a>
+    </div>
+  </footer>
+
+  <div id="bookModal" class="book-modal-shell hidden" aria-hidden="true">
+    <div class="book-modal-backdrop" onclick="closeNoteBook()"></div>
+    <div class="book-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="bookModalTitle">
+      <button type="button" class="book-modal-close" aria-label="关闭笔记" onclick="closeNoteBook()">×</button>
+      <div class="book-modal-head">
+        <div>
+          <span id="bookModalCategory" class="note-category">笔记</span>
+          <h3 id="bookModalTitle">笔记标题</h3>
+          <p id="bookModalSummary"></p>
+        </div>
+        <div id="bookModalMeta" class="book-modal-meta"></div>
+      </div>
+      <div class="book-spread">
+        <section class="book-page book-page--left">
+          <span class="book-page-label">目录</span>
+          <div id="bookToc" class="book-toc"></div>
+        </section>
+        <section class="book-page book-page--right">
+          <span class="book-page-label">正文</span>
+          <h4 id="bookChapterTitle"></h4>
+          <div id="bookChapterContent" class="book-chapter-content"></div>
+          <div id="bookExternalLink" class="book-external-link"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="assetUploadInput" class="hidden" onchange="handleStudioAssetUpload(event)">
+  <div id="toastHost" class="toast-host" aria-live="polite"></div>
+
+  <script src="js/app.js?v=20260423f"></script>
+</body>
+</html>

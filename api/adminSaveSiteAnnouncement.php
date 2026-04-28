@@ -71,7 +71,7 @@ function announcement_payload(array $input): array
 }
 
 $adminUserId = isset($_POST['adminUserId']) ? (int) $_POST['adminUserId'] : 0;
-require_admin($pdo, $adminUserId);
+$adminUserId = require_admin($pdo, $adminUserId);
 
 ensure_site_settings_table($pdo);
 
@@ -107,6 +107,10 @@ $upsert->execute(['site_announcement_title', $payload['title']]);
 $upsert->execute(['site_announcement_body', $payload['body']]);
 $upsert->execute(['site_announcement_image', $payload['image']]);
 $upsert->execute(['site_announcement_link', $payload['link']]);
+log_admin_action($pdo, $adminUserId, 'site_announcement_save', 'site_settings', 'site_announcement', [
+    'enabled' => $payload['enabled'] ? 1 : 0,
+    'title' => $payload['title'],
+]);
 
 echo json_encode([
     'code' => 1,

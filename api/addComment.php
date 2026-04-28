@@ -1,11 +1,14 @@
 <?php
 include 'config.php';
+include 'require_admin.php';
 include 'user_mute_guard.php';
 include 'sensitive_words.php';
 include 'behavior_logger.php';
 
 $postId = isset($_POST['postId']) ? (int) $_POST['postId'] : 0;
 $userId = isset($_POST['userId']) ? (int) $_POST['userId'] : 0;
+$userId = require_user($pdo, $userId);
+enforce_rate_limit($pdo, 'create_comment', 40, 600, (string) $userId);
 $content = isset($_POST['content']) ? trim($_POST['content']) : '';
 $imagesRaw = isset($_POST['images']) ? trim((string) $_POST['images']) : '[]';
 $isAnonymous = isset($_POST['isAnonymous']) ? (int) $_POST['isAnonymous'] : 0;

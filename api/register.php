@@ -1,9 +1,15 @@
 <?php
 include 'config.php';
+require_once 'require_admin.php';
 
 $phone = isset($_POST['phone']) ? trim($_POST['phone']) : '';
 $password = isset($_POST['password']) ? $_POST['password'] : '';
 $nickname = isset($_POST['nickname']) ? trim($_POST['nickname']) : '';
+
+enforce_rate_limit($pdo, 'register_ip', 8, 3600);
+if ($phone !== '') {
+    enforce_rate_limit($pdo, 'register_phone', 3, 3600, $phone);
+}
 
 if ($phone === '' || $password === '' || $nickname === '') {
     echo json_encode(['code' => 0, 'msg' => '请输入手机号、密码和昵称'], JSON_UNESCAPED_UNICODE);
@@ -54,12 +60,13 @@ if ($oStmt->fetch()) {
     exit;
 }
 
-$hash = md5($password);
+$hash = password_hash($password, PASSWORD_DEFAULT);
 $stmt = $pdo->prepare(
     'INSERT INTO users (openid, username, password, nickname, role, phone) VALUES (?, ?, ?, ?, ?, ?)'
 );
 if ($stmt->execute([$openid, $username, $hash, $nickname, 'student', $phone])) {
     $userId = (int) $pdo->lastInsertId();
+    $authToken = issue_user_token($pdo, $userId);
     echo json_encode([
         'code' => 1,
         'msg' => '注册成功',
@@ -71,6 +78,7 @@ if ($stmt->execute([$openid, $username, $hash, $nickname, 'student', $phone])) {
             'avatar_url' => null,
             'role' => 'student',
             'is_muted' => 0,
+            'authToken' => $authToken,
         ],
     ], JSON_UNESCAPED_UNICODE);
 } else {

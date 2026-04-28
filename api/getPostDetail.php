@@ -1,9 +1,13 @@
 ﻿<?php
 include 'config.php';
+include 'require_admin.php';
 include 'behavior_logger.php';
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $userId = isset($_GET['userId']) ? (int) $_GET['userId'] : 0;
+if ($userId > 0) {
+    $userId = require_user($pdo, $userId);
+}
 
 if ($id <= 0) {
     echo json_encode(['code' => 0, 'msg' => '参数错误']);

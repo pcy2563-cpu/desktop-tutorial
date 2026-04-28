@@ -51,6 +51,8 @@
 - 规则化推荐
 - 数据可视化统计
 - 图片上传压缩
+- 接口请求去重、超时控制与短时缓存
+- Service Worker 静态资源缓存，提升弱网访问稳定性
 
 ## 技术栈
 
@@ -59,6 +61,7 @@
 - Database: MySQL
 - Deployment: Ubuntu + BT Panel
 - Runtime optimization: PHP-FPM + OPcache
+- Client optimization: Request dedupe / timeout / short cache / Service Worker
 
 ## 目录结构
 
@@ -193,6 +196,8 @@ $pass = getenv('DB_PASS') ?: 'change_me';
 ## 已完成的代表性优化
 
 - 图片打开后支持放大、缩小、拖拽、移动端双指缩放
+- 前端接口层增加请求去重、10 秒超时保护和短时缓存，减少重复点击造成的并发请求
+- 增加 Service Worker 缓存站点外壳，弱网时优先保证页面和静态资源可打开
 - 评论输入区改为点击后展开，减少页面杂乱
 - 轮播图与公告从发布页拆分到管理员入口
 - 首页帖子按时间顺序展示
