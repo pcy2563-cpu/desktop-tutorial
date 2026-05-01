@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1280" role="img" aria-label="浅显图标">
+  <style>
+    .solid {
+      fill: #111111;
+    }
+
+    .thin {
+      fill: none;
+      stroke: #111111;
+      stroke-width: 4;
+      stroke-linecap: square;
+    }
+  </style>
+
+  <path
+    class="solid"
+    d="M423 434C468 442 511 470 541 515C523 528 509 541 500 556C479 518 454 478 423 434Z"
+  />
+  <path
+    class="solid"
+    d="M441 749C476 775 509 807 538 849C524 857 511 868 500 883C485 847 465 810 441 749Z"
+  />
+  <path class="solid" d="M780 445H824L742 523L726 507Z" />
+  <path class="thin" d="M458 655 595 518" />
+  <path class="thin" d="M593 699 782 512" />
+  <path
+    class="solid"
+    d="M627 363H653V489C653 556 671 628 707 694C738 754 777 800 823 846C813 850 804 849 794 846C751 797 715 750 684 697C646 628 627 554 627 487V363Z"
+  />
+</svg>
