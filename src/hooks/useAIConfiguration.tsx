@@ -5,10 +5,10 @@ import { useAuthStore } from "@/store/useAuthStore";
 
 export const useAIConfiguration = () => {
   const router = useRouter();
-  const { user, fetchMe } = useAuthStore();
+  const { fetchMe } = useAuthStore();
 
   const checkConfiguration = async () => {
-    const currentUser = user || await fetchMe().catch(() => null);
+    const currentUser = await fetchMe().catch(() => null);
 
     if (!currentUser) {
       toast.error(
