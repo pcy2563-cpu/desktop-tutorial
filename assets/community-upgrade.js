@@ -113,7 +113,7 @@
   }
 
   function ensureDesktopPanels() {
-    const isHome = location.pathname.endsWith('/home') || location.pathname.endsWith('/vue-test/') || location.pathname.endsWith('/vue-test');
+    const isHome = location.pathname === '/' || location.pathname.endsWith('/home');
     if (!isHome) {
       document.querySelectorAll('.community-desktop-panel').forEach((node) => node.remove());
       return;
