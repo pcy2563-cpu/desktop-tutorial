@@ -1,34 +1,8 @@
-deploy-*/
-deploy-*.zip
-deploy-*.tar.gz
-
-uploads/
-h5/uploads/
-
-api/config.php
-api/config.local.php
-api/*.local.php
-
-.env
-.env.*
-
-*.log
-*.tmp
 *.bak
-*.swp
-*.zip
-*.tar.gz
+*.tmp
+*.log
 
 .DS_Store
 Thumbs.db
 
-# backup dirs
-backup-*/
-
-# other projects in root
-bili-music-app/
-miniprogram/
-magic-resume/
-
-# node
-node_modules/
+uploads/
