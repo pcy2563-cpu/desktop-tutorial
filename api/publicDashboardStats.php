@@ -1,6 +1,7 @@
 <?php
 include 'config.php';
 include 'require_admin.php';
+include 'forum_response_helper.php';
 
 if (!function_exists('dashboard_behavior_focus_label')) {
     function dashboard_behavior_focus_label(string $type): string
@@ -140,10 +141,11 @@ try {
          WHERE behavior_type = 'search' AND keyword IS NOT NULL AND keyword <> ''
            AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
          GROUP BY keyword
+         HAVING total >= 5
          ORDER BY total DESC, keyword ASC
-         LIMIT 8"
+         LIMIT 30"
     );
-    $topKeywords = $topKeywordsStmt->fetchAll(PDO::FETCH_ASSOC);
+    $topKeywords = forum_filter_keyword_rows($topKeywordsStmt->fetchAll(PDO::FETCH_ASSOC), 8, 5);
 
     $behaviorTrendStmt = $pdo->query(
         "SELECT DATE(created_at) AS log_date,
@@ -294,8 +296,9 @@ if ($isAdmin) {
     ];
 }
 
-echo json_encode([
+forum_json([
     'code' => 1,
+    'msg' => 'ok',
     'data' => [
         'summary' => $summary,
         'content_segments' => $contentSegments,
@@ -310,4 +313,4 @@ echo json_encode([
         'active_users' => $activeUsers,
         'admin_extra' => $adminExtra,
     ],
-], JSON_UNESCAPED_UNICODE);
+]);

@@ -11,7 +11,7 @@ $stmt = $pdo->prepare(
     "SELECT p.id, p.user_id, p.title, p.content, p.images, p.category, p.is_anonymous,
             p.view_count, p.like_count AS likes, p.comment_count, p.is_top, p.created_at, p.updated_at,
             l.created_at AS liked_at,
-            COALESCE(NULLIF(u.nickname, ''), NULLIF(u.username, ''), CONCAT('用户', p.user_id)) AS user_nickname,
+            COALESCE(NULLIF(u.nickname, ''), NULLIF(u.username, ''), CONCAT('User ', p.user_id)) AS user_nickname,
             u.avatar AS user_avatar
      FROM forum_likes l
      INNER JOIN forum_posts p ON p.id = l.post_id
@@ -28,11 +28,12 @@ $likedMap = cc_fetch_liked_post_map($pdo, $userId, array_map(static function ($r
     return (int) ($row['id'] ?? 0);
 }, $rows));
 
-$items = array_map(static function ($row) use ($likedMap) {
-    return cc_normalize_post_row($row, $likedMap);
+$items = array_map(static function ($row) use ($likedMap, $userId) {
+    return cc_normalize_post_row($row, $likedMap, $userId);
 }, $rows);
 
-echo json_encode([
+forum_json([
     'code' => 1,
+    'msg' => 'ok',
     'data' => $items,
-], JSON_UNESCAPED_UNICODE);
+]);

@@ -4,6 +4,7 @@ include 'require_admin.php';
 include 'user_mute_guard.php';
 include 'sensitive_words.php';
 include 'behavior_logger.php';
+include 'forum_response_helper.php';
 
 $userId = isset($_POST['userId']) ? (int) $_POST['userId'] : 0;
 $userId = require_user($pdo, $userId);
@@ -13,13 +14,6 @@ $content = isset($_POST['content']) ? trim($_POST['content']) : '';
 $categoryId = isset($_POST['categoryId']) ? (int) $_POST['categoryId'] : 0;
 $imagesRaw = isset($_POST['images']) ? trim($_POST['images']) : '';
 $isAnonymous = isset($_POST['isAnonymous']) ? (int) $_POST['isAnonymous'] : 0;
-
-$slugByCatId = [
-    1 => 'study',
-    2 => 'life',
-    3 => 'used',
-    4 => 'activity',
-];
 
 if ($userId <= 0) {
     echo json_encode(['code' => 0, 'msg' => '参数不完整']);
@@ -83,7 +77,10 @@ if ($clen > 2000) {
     exit;
 }
 
-$slug = $slugByCatId[$categoryId] ?? 'life';
+$slug = forum_category_id_to_slug($categoryId);
+if ($slug === '') {
+    $slug = 'help';
+}
 
 $usr = $pdo->prepare('SELECT id FROM users WHERE id = ?');
 $usr->execute([$userId]);

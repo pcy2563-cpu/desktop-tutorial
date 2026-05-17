@@ -10,7 +10,7 @@ cc_assert_valid_user($pdo, $userId);
 $stmt = $pdo->prepare(
     "SELECT c.id AS comment_id, c.post_id, c.user_id, c.content, c.images, c.is_anonymous, c.created_at,
             p.title AS post_title, p.category, p.images AS post_images, p.content AS post_content,
-            COALESCE(NULLIF(u.nickname, ''), NULLIF(u.username, ''), CONCAT('用户', c.user_id)) AS user_nickname,
+            COALESCE(NULLIF(u.nickname, ''), NULLIF(u.username, ''), CONCAT('User ', c.user_id)) AS user_nickname,
             u.avatar AS user_avatar
      FROM forum_comments c
      INNER JOIN forum_posts p ON p.id = c.post_id
@@ -25,23 +25,24 @@ $stmt = $pdo->prepare(
 $stmt->execute([$userId, $userId]);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$items = array_map(static function ($row) {
-    $row = cc_normalize_actor($row);
+$items = array_map(static function ($row) use ($userId) {
+    $row = cc_normalize_actor($row, 'is_anonymous', $userId);
     $imageCount = count(cc_parse_images($row['images'] ?? '[]', 6));
     $content = trim((string) ($row['content'] ?? ''));
     if ($content !== '') {
         $row['reply_preview'] = cc_summarize_text($content, 72);
     } elseif ($imageCount > 0) {
-        $row['reply_preview'] = '发布了图片评论';
+        $row['reply_preview'] = forum_u('\u53d1\u5e03\u4e86\u56fe\u7247\u8bc4\u8bba');
     } else {
-        $row['reply_preview'] = '发布了新的评论';
+        $row['reply_preview'] = forum_u('\u53d1\u5e03\u4e86\u65b0\u7684\u8bc4\u8bba');
     }
     $row['post_preview'] = cc_summarize_text((string) ($row['post_content'] ?? ''), 80);
     $row['image_count'] = $imageCount;
     return $row;
 }, $rows);
 
-echo json_encode([
+forum_json([
     'code' => 1,
+    'msg' => 'ok',
     'data' => $items,
-], JSON_UNESCAPED_UNICODE);
+]);

@@ -35,9 +35,9 @@ if ($file['error'] !== UPLOAD_ERR_OK) {
     sendResponse(0, $errorMessages[$file['error']] ?? ('Upload failed: ' . $file['error']));
 }
 
-$maxSize = 20 * 1024 * 1024;
+$maxSize = 8 * 1024 * 1024;
 if ($file['size'] > $maxSize) {
-    sendResponse(0, 'Image must be 20MB or smaller');
+    sendResponse(0, 'Image must be 8MB or smaller');
 }
 
 $tmpPath = $file['tmp_name'];
@@ -59,6 +59,16 @@ $allowedMimeTypes = [
 
 if (!in_array($mimeType, $allowedMimeTypes, true)) {
     sendResponse(0, 'Unsupported image format. Please upload JPG, PNG, or WEBP.');
+}
+
+$imageInfo = @getimagesize($tmpPath);
+if (!$imageInfo || empty($imageInfo[0]) || empty($imageInfo[1])) {
+    sendResponse(0, 'Invalid image file');
+}
+$sourceWidth = (int) $imageInfo[0];
+$sourceHeight = (int) $imageInfo[1];
+if ($sourceWidth < 1 || $sourceHeight < 1 || $sourceWidth > 6000 || $sourceHeight > 6000 || ($sourceWidth * $sourceHeight) > 24000000) {
+    sendResponse(0, 'Image dimensions are too large');
 }
 
 $extensionMap = [
@@ -93,16 +103,28 @@ if (!$saved) {
 }
 
 $publicPath = '/uploads/forum/' . $subdir . '/' . $uniqueName;
+$thumbName = variantFileName($uniqueName, '_thumb');
+$mediumName = variantFileName($uniqueName, '_medium');
+$thumbDestination = $uploadRoot . '/' . $thumbName;
+$mediumDestination = $uploadRoot . '/' . $mediumName;
+$thumbSaved = saveResizedImage($destination, $thumbDestination, $mimeType, 480);
+$mediumSaved = saveResizedImage($destination, $mediumDestination, $mimeType, 1200);
+$thumbPath = $thumbSaved ? '/uploads/forum/' . $subdir . '/' . $thumbName : $publicPath;
+$mediumPath = $mediumSaved ? '/uploads/forum/' . $subdir . '/' . $mediumName : $publicPath;
 $finalSize = is_file($destination) ? (int) filesize($destination) : $originalSize;
 
 sendResponse(1, 'Upload success', [
     'url' => $publicPath,
+    'thumb_url' => $thumbPath,
+    'medium_url' => $mediumPath,
     'filename' => $uniqueName,
     'original_name' => $originalName,
     'size' => $finalSize,
     'original_size' => $originalSize,
     'mime_type' => $mimeType,
     'extension' => $extension,
+    'width' => $sourceWidth,
+    'height' => $sourceHeight,
 ]);
 
 function detectMimeType($tmpPath, array $file) {
@@ -128,6 +150,10 @@ function detectMimeType($tmpPath, array $file) {
 }
 
 function saveOptimizedImage($tmpPath, $destination, $mimeType) {
+    return saveResizedImage($tmpPath, $destination, $mimeType, 1600);
+}
+
+function saveResizedImage($tmpPath, $destination, $mimeType, $maxDimension) {
     if (!extension_loaded('gd')) {
         return false;
     }
@@ -139,7 +165,6 @@ function saveOptimizedImage($tmpPath, $destination, $mimeType) {
 
     $width = (int) $imageInfo[0];
     $height = (int) $imageInfo[1];
-    $maxDimension = 1600;
     $scale = min(1, $maxDimension / max($width, $height));
     $targetWidth = max(1, (int) round($width * $scale));
     $targetHeight = max(1, (int) round($height * $scale));
@@ -190,6 +215,14 @@ function saveOptimizedImage($tmpPath, $destination, $mimeType) {
     }
 
     return false;
+}
+
+function variantFileName($fileName, $suffix) {
+    $dot = strrpos($fileName, '.');
+    if ($dot === false) {
+        return $fileName . $suffix;
+    }
+    return substr($fileName, 0, $dot) . $suffix . substr($fileName, $dot);
 }
 
 function createCanvas($width, $height, $transparent) {

@@ -1,4 +1,4 @@
-﻿const USER_KEY = 'campus_forum_user';
+const USER_KEY = 'campus_forum_user';
 const REMEMBER_PHONE_KEY = 'campus_forum_saved_phone';
 const REMEMBER_PASS_KEY = 'campus_forum_saved_password';
 const LEGACY_REMEMBER_USER_KEY = 'campus_forum_saved_username';
@@ -641,6 +641,81 @@ function userIsMuted() {
   return currentUser && (Number(currentUser.is_muted) === 1 || currentUser.is_muted === true);
 }
 
+function getPostSearchInput() {
+  return document.getElementById('postSearchInput');
+}
+
+function normalizePostSearchText(value) {
+  return Array.from(String(value || '').replace(/\s+/g, ' ').trim()).slice(0, 30).join('');
+}
+
+function getPostSearchValue() {
+  const input = getPostSearchInput();
+  if (!input) return '';
+  if ('value' in input) return normalizePostSearchText(input.value);
+  return normalizePostSearchText(input.textContent || '');
+}
+
+function setPostSearchValue(value) {
+  const input = getPostSearchInput();
+  if (!input) return;
+  const safeValue = normalizePostSearchText(value);
+  if ('value' in input) {
+    input.value = safeValue;
+  } else {
+    input.textContent = safeValue;
+  }
+  input.classList.toggle('has-value', !!safeValue);
+}
+
+function clearPostSearchIfPhone() {
+  const value = getPostSearchValue();
+  if (!value) return;
+  const savedPhone = (localStorage.getItem(REMEMBER_PHONE_KEY) || '').trim();
+  const currentPhone = currentUser && currentUser.phone ? String(currentUser.phone).trim() : '';
+  if (/^1\d{10}$/.test(value) || value === savedPhone || value === currentPhone) {
+    setPostSearchValue('');
+    postSearchKeyword = '';
+  }
+}
+
+function bindPostSearchBox() {
+  const input = getPostSearchInput();
+  if (!input || input.dataset.bound === '1') return;
+  input.dataset.bound = '1';
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      applySearch();
+    }
+  });
+  input.addEventListener('input', () => {
+    const value = getPostSearchValue();
+    if (value !== (input.textContent || '').trim() && !('value' in input)) {
+      setPostSearchValue(value);
+      placeCaretAtEnd(input);
+    } else {
+      input.classList.toggle('has-value', !!value);
+    }
+  });
+  input.addEventListener('paste', (event) => {
+    event.preventDefault();
+    const text = event.clipboardData ? event.clipboardData.getData('text/plain') : '';
+    setPostSearchValue(text);
+    placeCaretAtEnd(input);
+  });
+}
+
+function placeCaretAtEnd(el) {
+  if (!el || 'value' in el || !window.getSelection || !document.createRange) return;
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  range.collapse(false);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const imgInput = document.getElementById('postImagesInput');
   if (imgInput) {
@@ -665,20 +740,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  const postSearchInput = document.getElementById('postSearchInput');
-  if (postSearchInput) {
-    postSearchInput.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        applySearch();
-      }
-    });
-  }
+  bindPostSearchBox();
 
   initUser();
   if (!currentUser) {
     await trySavedLogin();
   }
+  clearPostSearchIfPhone();
 
   await loadSiteBranding();
   await loadSiteAnnouncement();
@@ -689,6 +757,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeAllModals();
   });
+});
+
+window.addEventListener('pageshow', () => {
+  clearPostSearchIfPhone();
 });
 
 function saveCredentials(phone) {
@@ -1042,10 +1114,6 @@ function openDashboardPage() {
 
 function openBehaviorPage() {
   switchTab('behavior');
-}
-
-function openLearningPage() {
-  window.location.href = '/blog/#learningSection';
 }
 
 function openAdminBannerPage() {
@@ -2175,8 +2243,8 @@ async function filterCategory(catId) {
 }
 
 async function applySearch() {
-  const input = document.getElementById('postSearchInput');
-  postSearchKeyword = input ? input.value.trim() : '';
+  postSearchKeyword = getPostSearchValue();
+  setPostSearchValue(postSearchKeyword);
   await loadPosts({ reset: true });
 }
 

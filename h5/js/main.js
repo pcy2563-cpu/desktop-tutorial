@@ -1,4 +1,4 @@
-﻿const USER_KEY = 'campus_forum_user';
+const USER_KEY = 'campus_forum_user';
 const REMEMBER_PHONE_KEY = 'campus_forum_saved_phone';
 const REMEMBER_PASS_KEY = 'campus_forum_saved_password';
 const LEGACY_REMEMBER_USER_KEY = 'campus_forum_saved_username';
@@ -785,7 +785,7 @@ function updateUserUI() {
           <div class="profile-account-meta">
             <h3>${name}${adminTag}${muteTag}</h3>
             <p>${escapeHtml(masked || '未绑定手机号')}</p>
-            <span class="profile-account-tip">${isAdminUser() ? '可进入管理员入口。' : '可进入画像和分析。'}</span>
+            <span class="profile-account-tip">${isAdminUser() ? '可进入管理员入口、个人博客和分析页。' : '可进入个人博客、画像和分析。'}</span>
           </div>
         </div>
         <div class="profile-account-stats">

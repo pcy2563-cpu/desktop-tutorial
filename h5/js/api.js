@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 与根目录 /api/*.php 对接（表单 POST + JSON 响应）
  */
 const API_BASE = `${window.location.origin.replace(/\/$/, '')}/api`;

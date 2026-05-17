@@ -1,42 +1,18 @@
 <?php
 
+require_once __DIR__ . '/forum_response_helper.php';
+
 if (!function_exists('cc_slug_to_category_id')) {
     function cc_slug_to_category_id(string $slug): int
     {
-        $key = strtolower(trim($slug));
-        if ($key === 'study') {
-            return 1;
-        }
-        if ($key === 'life') {
-            return 2;
-        }
-        if ($key === 'used' || $key === 'secondhand') {
-            return 3;
-        }
-        if ($key === 'activity') {
-            return 4;
-        }
-        return 0;
+        return forum_category_slug_to_id($slug);
     }
 }
 
 if (!function_exists('cc_category_label')) {
     function cc_category_label(string $slug): string
     {
-        $key = strtolower(trim($slug));
-        if ($key === 'study') {
-            return '学习';
-        }
-        if ($key === 'life') {
-            return '生活';
-        }
-        if ($key === 'used' || $key === 'secondhand') {
-            return '二手';
-        }
-        if ($key === 'activity') {
-            return '活动';
-        }
-        return $slug !== '' ? $slug : '其他';
+        return forum_category_label($slug);
     }
 }
 
@@ -65,25 +41,7 @@ if (!function_exists('cc_summarize_text')) {
 if (!function_exists('cc_parse_images')) {
     function cc_parse_images($raw, int $limit = 9): array
     {
-        if (!$raw) {
-            return [];
-        }
-
-        if (is_string($raw)) {
-            $decoded = json_decode($raw, true);
-        } else {
-            $decoded = $raw;
-        }
-
-        if (!is_array($decoded)) {
-            return [];
-        }
-
-        $items = array_values(array_filter($decoded, static function ($item) {
-            return is_string($item) && preg_match('#^/uploads/forum/#', trim($item));
-        }));
-
-        return array_slice($items, 0, max(0, $limit));
+        return forum_parse_images($raw, $limit);
     }
 }
 
@@ -91,8 +49,7 @@ if (!function_exists('cc_assert_valid_user')) {
     function cc_assert_valid_user(PDO $pdo, int $userId): array
     {
         if ($userId <= 0) {
-            echo json_encode(['code' => 0, 'msg' => '请先登录'], JSON_UNESCAPED_UNICODE);
-            exit;
+            forum_json(['code' => 0, 'msg' => forum_u('\u8bf7\u5148\u767b\u5f55')]);
         }
 
         $stmt = $pdo->prepare(
@@ -104,8 +61,7 @@ if (!function_exists('cc_assert_valid_user')) {
         $stmt->execute([$userId]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$user) {
-            echo json_encode(['code' => 0, 'msg' => '用户不存在'], JSON_UNESCAPED_UNICODE);
-            exit;
+            forum_json(['code' => 0, 'msg' => forum_u('\u7528\u6237\u4e0d\u5b58\u5728')]);
         }
 
         return $user;
@@ -141,32 +97,19 @@ if (!function_exists('cc_fetch_liked_post_map')) {
 }
 
 if (!function_exists('cc_normalize_post_row')) {
-    function cc_normalize_post_row(array $row, array $likedMap = []): array
+    function cc_normalize_post_row(array $row, array $likedMap = [], int $viewerUserId = 0): array
     {
-        $category = strtolower(trim((string) ($row['category'] ?? '')));
-        $row['category_id'] = cc_slug_to_category_id($category);
-        $row['category_label'] = cc_category_label($category);
-        $row['is_anonymous'] = !empty($row['is_anonymous']) ? 1 : 0;
-        $row['liked_by_me'] = !empty($likedMap[(int) ($row['id'] ?? 0)]) ? 1 : 0;
-        if ($row['is_anonymous'] === 1) {
-            $row['user_nickname'] = '匿名用户';
-            $row['user_avatar'] = null;
-        }
-
-        return $row;
+        return forum_public_post($row, $viewerUserId, $likedMap);
     }
 }
 
 if (!function_exists('cc_normalize_actor')) {
-    function cc_normalize_actor(array $row, string $flagField = 'is_anonymous'): array
+    function cc_normalize_actor(array $row, string $flagField = 'is_anonymous', int $viewerUserId = 0): array
     {
-        $row[$flagField] = !empty($row[$flagField]) ? 1 : 0;
-        if ((int) $row[$flagField] === 1) {
-            $row['user_nickname'] = '匿名用户';
-            $row['user_avatar'] = null;
-        } elseif (empty($row['user_nickname'])) {
-            $row['user_nickname'] = '论坛用户';
+        if ($flagField !== 'is_anonymous' && isset($row[$flagField])) {
+            $row['is_anonymous'] = $row[$flagField];
         }
+        $row = forum_public_comment($row, $viewerUserId);
 
         $category = strtolower(trim((string) ($row['category'] ?? '')));
         $row['category_id'] = cc_slug_to_category_id($category);

@@ -15,6 +15,7 @@ api/*.local.php
 *.log
 *.tmp
 *.bak
+*.bak.*
 *.swp
 
 .DS_Store

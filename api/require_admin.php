@@ -1,7 +1,13 @@
 <?php
 
+function security_u(string $escaped): string {
+    $decoded = json_decode('"' . $escaped . '"');
+    return is_string($decoded) ? $decoded : $escaped;
+}
+
 function admin_error($message) {
-    echo json_encode(['code' => 0, 'msg' => $message], JSON_UNESCAPED_UNICODE);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['code' => 0, 'msg' => $message], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
 
@@ -107,13 +113,13 @@ function enforce_rate_limit(PDO $pdo, $scope, $limit, $windowSeconds, $identity 
     );
     $stmt->execute([$rateKey, $scope, $clientId]);
 
-    $check = $pdo->prepare('SELECT request_count, window_expires_at FROM security_rate_limits WHERE rate_key = ? LIMIT 1');
+    $check = $pdo->prepare('SELECT request_count FROM security_rate_limits WHERE rate_key = ? LIMIT 1');
     $check->execute([$rateKey]);
     $row = $check->fetch(PDO::FETCH_ASSOC);
 
     if ($row && (int) ($row['request_count'] ?? 0) > $limit) {
         http_response_code(429);
-        admin_error('操作过于频繁，请稍后再试');
+        admin_error(security_u('\u64cd\u4f5c\u8fc7\u4e8e\u9891\u7e41\uff0c\u8bf7\u7a0d\u540e\u518d\u8bd5'));
     }
 
     if (random_int(1, 100) === 1) {
@@ -177,6 +183,11 @@ function read_auth_token() {
     if ($token === '' && isset($_SERVER['HTTP_X_AUTH_TOKEN'])) {
         $token = trim((string) $_SERVER['HTTP_X_AUTH_TOKEN']);
     }
+    if ($token === '' && isset($_SERVER['HTTP_AUTHORIZATION'])) {
+        if (preg_match('/Bearer\s+(.+)/i', (string) $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+            $token = trim($matches[1]);
+        }
+    }
     return $token;
 }
 
@@ -185,7 +196,7 @@ function require_user(PDO $pdo, $expectedUserId = null) {
 
     $token = read_auth_token();
     if ($token === '') {
-        admin_error('登录已过期，请重新登录');
+        admin_error(security_u('\u767b\u5f55\u5df2\u8fc7\u671f\uff0c\u8bf7\u91cd\u65b0\u767b\u5f55'));
     }
 
     $hash = hash('sha256', $token);
@@ -200,13 +211,13 @@ function require_user(PDO $pdo, $expectedUserId = null) {
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$row) {
-        admin_error('登录已过期，请重新登录');
+        admin_error(security_u('\u767b\u5f55\u5df2\u8fc7\u671f\uff0c\u8bf7\u91cd\u65b0\u767b\u5f55'));
     }
 
     $actualUserId = (int) $row['id'];
     $expected = (int) $expectedUserId;
     if ($expected > 0 && $actualUserId !== $expected) {
-        admin_error('登录身份不匹配，请重新登录');
+        admin_error(security_u('\u767b\u5f55\u8eab\u4efd\u4e0d\u5339\u914d\uff0c\u8bf7\u91cd\u65b0\u767b\u5f55'));
     }
 
     $update = $pdo->prepare('UPDATE user_sessions SET last_used_at = NOW() WHERE token_hash = ?');
@@ -220,7 +231,7 @@ function require_admin(PDO $pdo, $adminUserId = null) {
 
     $token = read_admin_token();
     if ($token === '') {
-        admin_error('管理员登录已过期，请重新登录');
+        admin_error(security_u('\u7ba1\u7406\u5458\u767b\u5f55\u5df2\u8fc7\u671f\uff0c\u8bf7\u91cd\u65b0\u767b\u5f55'));
     }
 
     $hash = hash('sha256', $token);
@@ -235,15 +246,21 @@ function require_admin(PDO $pdo, $adminUserId = null) {
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$row || ($row['role'] ?? '') !== 'admin') {
-        admin_error('仅管理员可操作，请重新登录');
+        admin_error(security_u('\u4ec5\u7ba1\u7406\u5458\u53ef\u64cd\u4f5c\uff0c\u8bf7\u91cd\u65b0\u767b\u5f55'));
     }
 
-    enforce_rate_limit($pdo, 'admin_api', 240, 600, (string) $row['id']);
+    $actualAdminId = (int) $row['id'];
+    $expectedAdminId = (int) $adminUserId;
+    if ($expectedAdminId > 0 && $expectedAdminId !== $actualAdminId) {
+        admin_error(security_u('\u7ba1\u7406\u5458\u8eab\u4efd\u4e0d\u5339\u914d\uff0c\u8bf7\u91cd\u65b0\u767b\u5f55'));
+    }
+
+    enforce_rate_limit($pdo, 'admin_api', 240, 600, (string) $actualAdminId);
 
     $update = $pdo->prepare('UPDATE admin_sessions SET last_used_at = NOW() WHERE token_hash = ?');
     $update->execute([$hash]);
 
-    return (int) $row['id'];
+    return $actualAdminId;
 }
 
 function log_admin_action(PDO $pdo, $adminUserId, $action, $targetType = null, $targetId = null, array $detail = []) {

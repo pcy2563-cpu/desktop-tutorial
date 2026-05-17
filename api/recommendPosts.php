@@ -2,6 +2,7 @@
 include 'config.php';
 include 'require_admin.php';
 include 'behavior_insights.php';
+include 'forum_response_helper.php';
 
 $userId = isset($_GET['userId']) ? (int) $_GET['userId'] : 0;
 $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 6;
@@ -57,17 +58,20 @@ foreach (($snapshot['category_preferences'] ?? []) as $row) {
     $categoryScoreMap[$category] = (int) ($row['score'] ?? 0);
 }
 
-$topKeywords = array_slice(array_values(array_filter($snapshot['top_keywords'] ?? [], static function ($word) {
-    return is_string($word) && trim($word) !== '';
-})), 0, 5);
-
-$idBySlug = [
-    'study' => 1,
-    'life' => 2,
-    'used' => 3,
-    'secondhand' => 3,
-    'activity' => 4,
-];
+$topKeywords = [];
+foreach (($snapshot['top_keywords'] ?? []) as $word) {
+    if (!is_string($word)) {
+        continue;
+    }
+    $keyword = trim($word);
+    if ($keyword === '' || forum_keyword_is_sensitive($keyword)) {
+        continue;
+    }
+    $topKeywords[] = $keyword;
+    if (count($topKeywords) >= 5) {
+        break;
+    }
+}
 
 $scored = [];
 foreach ($rows as $post) {
@@ -143,12 +147,7 @@ foreach ($rows as $post) {
     $post['score'] = round($score, 2);
     $post['recommended_reason'] = $reason;
     $post['liked_by_me'] = $likedByMe;
-    $post['category_id'] = $idBySlug[$category] ?? 0;
-    $post['is_anonymous'] = !empty($post['is_anonymous']) ? 1 : 0;
-    if ($post['is_anonymous'] === 1) {
-        $post['user_nickname'] = "\u{533F}\u{540D}\u{7528}\u{6237}";
-        $post['user_avatar'] = null;
-    }
+    $post = forum_public_post($post, $userId, $likedMap);
     $scored[] = $post;
 }
 
@@ -161,8 +160,9 @@ usort($scored, static function (array $a, array $b): int {
 
 $result = array_slice($scored, 0, $limit);
 
-echo json_encode([
+forum_json([
     'code' => 1,
+    'msg' => 'ok',
     'data' => $result,
     'profile' => [
         'active_score' => (int) ($snapshot['active_score'] ?? 0),
@@ -171,4 +171,4 @@ echo json_encode([
         'profile_stage_label' => $snapshot['profile_stage_label'] ?? '',
         'top_keywords' => $topKeywords,
     ],
-], JSON_UNESCAPED_UNICODE);
+]);

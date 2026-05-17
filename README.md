@@ -33,17 +33,18 @@
 │   ├── require_admin.php    # 用户/管理员令牌校验与安全工具
 │   ├── sensitive_words.php  # 敏感词规则
 │   └── migrate_*.sql        # 数据库迁移脚本
-├── blog/                   # 早期博客静态页面资源
 ├── sw.js                   # Service Worker 缓存策略
 └── README.md
 ```
+
+> 个人博客已按需求独立为单独项目部署在 `/blog/`，校园论坛仓库不再内置博客页面或博客维护接口。
 
 ## 本地运行
 
 1. 准备 PHP 8.x、MySQL 5.7+ 或 MySQL 8.x。
 2. 创建数据库，字符集建议使用 `utf8mb4`。
 3. 将 `api/config.example.php` 复制为 `api/config.php`，填写数据库连接信息。
-4. 导入基础表结构，并按需执行 `api/migrate_*.sql` 迁移脚本。
+4. 导入 `api/schema.sql` 基础表结构，并按需执行 `api/migrate_*.sql` 迁移脚本。
 5. 将项目放入站点根目录，确保 `/uploads/forum/` 目录有写入权限。
 6. 访问 `/index.html` 或 `/h5/index.html` 即可使用。
 

@@ -2,6 +2,7 @@
 include 'config.php';
 include 'require_admin.php';
 include 'behavior_logger.php';
+include 'forum_response_helper.php';
 
 $categoryId = isset($_GET['categoryId']) ? (int) $_GET['categoryId'] : 0;
 $userId = isset($_GET['userId']) ? (int) $_GET['userId'] : 0;
@@ -14,21 +15,6 @@ $pageSize = isset($_GET['pageSize']) ? (int) $_GET['pageSize'] : 8;
 $pageSize = max(1, min(20, $pageSize));
 $offset = ($page - 1) * $pageSize;
 
-$slugByCatId = [
-    1 => 'study',
-    2 => 'life',
-    3 => 'used',
-    4 => 'activity',
-];
-
-$idBySlug = [
-    'study' => 1,
-    'life' => 2,
-    'used' => 3,
-    'secondhand' => 3,
-    'activity' => 4,
-];
-
 $baseWhere = ' FROM forum_posts p
         LEFT JOIN users u ON p.user_id = u.id
         WHERE p.status = ?';
@@ -39,10 +25,10 @@ $sql = 'SELECT p.id, p.user_id, p.title, p.content, p.images, p.category, p.is_a
 
 $params = ['normal'];
 
-if ($categoryId > 0 && isset($slugByCatId[$categoryId])) {
+if ($categoryId > 0 && forum_category_id_to_slug($categoryId) !== '') {
     $sql .= ' AND p.category = ?';
     $baseWhere .= ' AND p.category = ?';
-    $params[] = $slugByCatId[$categoryId];
+    $params[] = forum_category_id_to_slug($categoryId);
 }
 
 if ($keyword !== '') {
@@ -81,14 +67,7 @@ if (!empty($posts) && $userId > 0) {
 }
 
 foreach ($posts as &$row) {
-    $slug = strtolower((string) ($row['category'] ?? ''));
-    $row['category_id'] = $idBySlug[$slug] ?? 0;
-    $row['is_anonymous'] = !empty($row['is_anonymous']) ? 1 : 0;
-    if ($row['is_anonymous'] === 1) {
-        $row['user_nickname'] = '匿名用户';
-        $row['user_avatar'] = null;
-    }
-    $row['liked_by_me'] = !empty($likedMap[(int) $row['id']]) ? 1 : 0;
+    $row = forum_public_post($row, $userId, $likedMap);
 }
 unset($row);
 
@@ -97,7 +76,7 @@ if ($userId > 0) {
         log_behavior($pdo, [
             'user_id' => $userId,
             'behavior_type' => 'search',
-            'category' => $categoryId > 0 && isset($slugByCatId[$categoryId]) ? $slugByCatId[$categoryId] : null,
+            'category' => $categoryId > 0 ? forum_category_id_to_slug($categoryId) : null,
             'keyword' => $keyword,
             'extra_data' => [
                 'page' => $page,
@@ -107,11 +86,11 @@ if ($userId > 0) {
         ]);
     }
 
-    if ($categoryId > 0 && isset($slugByCatId[$categoryId])) {
+    if ($categoryId > 0 && forum_category_id_to_slug($categoryId) !== '') {
         log_behavior($pdo, [
             'user_id' => $userId,
             'behavior_type' => 'browse_category',
-            'category' => $slugByCatId[$categoryId],
+            'category' => forum_category_id_to_slug($categoryId),
             'extra_data' => [
                 'page' => $page,
                 'page_size' => $pageSize,
@@ -121,8 +100,9 @@ if ($userId > 0) {
     }
 }
 
-echo json_encode([
+forum_json([
     'code' => 1,
+    'msg' => 'ok',
     'data' => $posts,
     'pagination' => [
         'page' => $page,
@@ -130,5 +110,5 @@ echo json_encode([
         'total' => $total,
         'has_more' => ($offset + count($posts)) < $total ? 1 : 0,
     ],
-], JSON_UNESCAPED_UNICODE);
+]);
 

@@ -1,10 +1,10 @@
-const CACHE_VERSION = 'qianxian-forum-20260428-authfix';
+const CACHE_VERSION = 'qianxian-forum-20260501-searchbox';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/css/style.css?v=20260428authfix',
-  '/js/api.js?v=20260428authfix',
-  '/js/main.js?v=20260428authfix',
+  '/css/style.css?v=20260501searchbox',
+  '/js/api.js?v=20260501searchbox',
+  '/js/main.js?v=20260501searchbox',
   '/h5/index.html',
 ];
 

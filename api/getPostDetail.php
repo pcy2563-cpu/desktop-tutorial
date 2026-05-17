@@ -1,7 +1,8 @@
-﻿<?php
+<?php
 include 'config.php';
 include 'require_admin.php';
 include 'behavior_logger.php';
+include 'forum_response_helper.php';
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $userId = isset($_GET['userId']) ? (int) $_GET['userId'] : 0;
@@ -10,8 +11,7 @@ if ($userId > 0) {
 }
 
 if ($id <= 0) {
-    echo json_encode(['code' => 0, 'msg' => '参数错误']);
-    exit;
+    forum_json(['code' => 0, 'msg' => forum_u('\u53c2\u6570\u9519\u8bef')]);
 }
 
 $skipView = isset($_GET['skipView']) && $_GET['skipView'] === '1';
@@ -31,26 +31,19 @@ $stmt->execute([$id, 'normal']);
 $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$post) {
-    echo json_encode(['code' => 0, 'msg' => '帖子不存在']);
-    exit;
+    forum_json(['code' => 0, 'msg' => forum_u('\u5e16\u5b50\u4e0d\u5b58\u5728')]);
 }
 
-$idBySlug = ['study' => 1, 'life' => 2, 'used' => 3, 'secondhand' => 3, 'activity' => 4];
 $slug = strtolower((string) ($post['category'] ?? ''));
-$post['category_id'] = $idBySlug[$slug] ?? 0;
-$post['is_anonymous'] = !empty($post['is_anonymous']) ? 1 : 0;
-if ($post['is_anonymous'] === 1) {
-    $post['user_nickname'] = '匿名用户';
-    $post['user_avatar'] = null;
-}
-
+$likedMap = [];
 if ($userId > 0) {
     $likeStmt = $pdo->prepare('SELECT id FROM forum_likes WHERE user_id = ? AND post_id = ? LIMIT 1');
     $likeStmt->execute([$userId, $id]);
-    $post['liked_by_me'] = $likeStmt->fetch() ? 1 : 0;
-} else {
-    $post['liked_by_me'] = 0;
+    if ($likeStmt->fetch()) {
+        $likedMap[$id] = 1;
+    }
 }
+$post = forum_public_post($post, $userId, $likedMap);
 
 $cstmt = $pdo->prepare(
     'SELECT c.id, c.post_id, c.user_id, c.parent_id, c.content, c.images, c.is_anonymous, c.like_count, c.created_at,
@@ -64,11 +57,7 @@ $cstmt->execute([$id, 'normal']);
 $comments = $cstmt->fetchAll(PDO::FETCH_ASSOC);
 
 foreach ($comments as &$comment) {
-    $comment['is_anonymous'] = !empty($comment['is_anonymous']) ? 1 : 0;
-    if ($comment['is_anonymous'] === 1) {
-        $comment['user_nickname'] = '匿名用户';
-        $comment['user_avatar'] = null;
-    }
+    $comment = forum_public_comment($comment, $userId);
 }
 unset($comment);
 
@@ -85,11 +74,11 @@ if (!$skipView && $userId > 0) {
     ]);
 }
 
-echo json_encode([
+forum_json([
     'code' => 1,
+    'msg' => 'ok',
     'data' => [
         'post' => $post,
         'comments' => $comments,
     ],
-], JSON_UNESCAPED_UNICODE);
-
+]);
