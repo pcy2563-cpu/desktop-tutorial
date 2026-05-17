@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+  <meta name="theme-color" content="#3b82f6">
+  <meta name="description" content="浅显通校园论坛 — 校园交流、内容发布与互动推荐平台">
+  <title>浅显通校园论坛</title>
+    
+  <link rel="stylesheet" href="css/app.v2.css?v=2">
+  <style>
+/* ===== WeChat Moments-style image grid (nuclear) ===== */
+
+/* Post list: small square thumbnails */
+.post-preview-grid,
+div[class*="post-preview-grid"] {
+  display: flex !important;
+  grid-template-columns: unset !important;
+  gap: 3px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex-wrap: wrap !important;
+}
+.post-preview-item,
+button[class*="post-preview-item"] {
+  width: 120px !important;
+  height: 120px !important;
+  min-height: 120px !important;
+  max-height: 120px !important;
+  flex-shrink: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  position: relative !important;
+}
+.post-preview-item img,
+button[class*="post-preview-item"] img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Detail page: square images, 2-column grid — NUCLEAR */
+.post-image-grid,
+.post-image-grid[class],
+div.post-image-grid,
+#detailContent .post-image-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 2px !important;
+  margin: 4px 0 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+.post-image-grid .image-grid-item,
+.post-image-grid button.image-grid-item,
+#detailContent .image-grid-item,
+#detailContent button.image-grid-item {
+  display: block !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  width: 100% !important;
+  height: auto !important;
+}
+.post-image-grid img,
+.post-image-grid .image-grid-item img,
+.post-image-grid button img,
+#detailContent .post-image-grid img,
+#detailContent .image-grid-item img,
+#detailContent button img {
+  width: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  max-height: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  transform: none !important;
+  border-collapse: separate !important;
+}
+
+/* Comment images */
+.comment-image-grid,
+.comment-image-grid .image-grid-item,
+.comment-image-grid img {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Remove spacing */
+.detail-text { margin-bottom: 0 !important; padding-bottom: 0 !important; }
+.detail-body { margin-bottom: 0 !important; padding-bottom: 0 !important; }
+#detailContent { padding-top: 2px !important; }
+
+/* Entry icon distinct colors */
+.profile-entry-card--behavior .profile-entry-icon {
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.26), transparent 28%),
+    linear-gradient(145deg, #7c3aed, #a855f7 62%, #c084fc) !important;
+  box-shadow: 0 16px 30px rgba(124, 58, 237, 0.3) !important;
+}
+.profile-entry-card--dashboard .profile-entry-icon {
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.26), transparent 28%),
+    linear-gradient(145deg, #059669, #10b981 62%, #34d399) !important;
+  box-shadow: 0 16px 30px rgba(5, 150, 105, 0.3) !important;
+}
+.profile-entry-card--admin-dashboard .profile-entry-icon {
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.26), transparent 28%),
+    linear-gradient(145deg, #059669, #10b981 62%, #34d399) !important;
+  box-shadow: 0 16px 30px rgba(5, 150, 105, 0.3) !important;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .post-preview-item,
+  button[class*="post-preview-item"] {
+    width: 100px !important;
+    height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
+  }
+}
+  </style>
+</head>
+<body>
+  <div id="appShell">
+  <header class="header">
+    <div class="header-brand">
+      <div id="headerLogo" class="header-logo" aria-hidden="true">
+        <span id="headerLogoText" class="header-logo-text">通</span>
+        <img id="headerLogoImage" class="header-logo-image hidden" alt="">
+      </div>
+      <div class="header-titles">
+        <h1 id="headerTitle">浅显通</h1>
+        <p id="headerTagline" class="header-tagline">校园论坛</p>
+      </div>
+    </div>
+    <div id="headerPageLabel" class="header-page-pill">首页</div>
+  </header>
+
+  <main class="app-pages">
+    <section id="homePage" class="app-page">
+      <section id="heroCarouselRoot" class="hero-root hidden" aria-label="活动轮播"></section>
+
+      <section class="search-bar-wrap" aria-label="帖子搜索">
+        <div class="search-bar">
+          <div
+            id="postSearchInput"
+            class="post-search-editable"
+            role="searchbox"
+            tabindex="0"
+            contenteditable="true"
+            aria-label="帖子搜索"
+           
+            data-maxlength="30"
+            inputmode="search"
+          ></div>
+          <button type="button" class="search-btn" onclick="applySearch()">搜索</button>
+        </div>
+      </section>
+
+      <nav class="categories" aria-label="内容栏目">
+        <button type="button" class="cat-btn active" data-id="0" onclick="filterCategory(0)">新发</button>
+        <button type="button" class="cat-btn" data-id="7" onclick="filterCategory(7)">我的帖子</button>
+        <button type="button" class="cat-btn" data-id="8" onclick="filterCategory(8)">收到回复</button>
+        <button type="button" class="cat-btn" data-id="5" onclick="filterCategory(5)">推荐</button>
+        <button type="button" class="cat-btn" data-id="6" onclick="filterCategory(6)">精选</button>
+        <button type="button" class="cat-btn" data-id="9" onclick="filterCategory(9)">点赞过</button>
+        <button type="button" class="cat-btn" data-id="10" onclick="filterCategory(10)">站内通知</button>
+      </nav>
+
+
+
+
+      <section id="homeRecommendProfileSection" class="insight-section hidden" aria-label="推荐分析">
+        <div class="section-head">
+          <div>
+            <p class="section-eyebrow">推荐画像</p>
+            <h2 class="section-title">推荐分析</h2>
+          </div>
+          <p class="section-desc">根据你的行为动态更新。</p>
+        </div>
+        <div id="homeRecommendProfileCard" class="insight-card">
+          <p class="insight-empty">登录后可查看推荐分析内容。</p>
+        </div>
+      </section>
+
+
+
+      <section class="post-list" id="postList">
+        <div class="loading"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
+      </section>
+      <div id="loadMoreWrap" class="load-more-wrap">
+        <button type="button" id="loadMoreBtn" class="load-more-btn hidden" onclick="loadMorePosts()">加载更多</button>
+      </div>
+
+      <!-- 备案通过后：把下方链接文字改成工信部颁发的备案号（含省份简称） -->
+      <footer class="site-footer">
+        <a class="site-footer-icp" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">赣ICP备2026005458号</a>
+      </footer>
+    </section>
+
+    <section id="postDetailPage" class="app-page hidden">
+      <div class="detail-page-shell">
+        <div class="detail-toolbar">
+          <button type="button" class="dashboard-back-btn" onclick="closePostDetailPage()" title="返回"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <button type="button" class="dashboard-refresh-btn" onclick="refreshCurrentPostDetail()" title="刷新"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></button>
+        </div>
+
+        <article class="detail-hero-card" aria-label="帖子详情">
+          <div class="detail-author detail-author--hero">
+            <img id="detailAvatar" src="" alt="">
+            <div class="detail-author-copy">
+              <span id="detailNickname"></span>
+              <small>发帖用户</small>
+            </div>
+          </div>
+          <div class="detail-top">
+            <span class="detail-badge hidden" id="detailTopBadge">置顶</span>
+            <span id="detailCategory" class="detail-pill"></span>
+            <h2 id="detailTitle" class="detail-title"></h2>
+          </div>
+          <div id="detailContent" class="detail-body"></div>
+          <div class="detail-footer-actions detail-footer-actions--inline">
+            <span id="detailTime" class="detail-pill muted"></span>
+            <span id="detailViews" class="detail-pill muted"></span>
+            <span id="detailLikes" class="detail-pill muted" onclick="toggleCurrentPostLike(event)" style="cursor:pointer;user-select:none"></span>
+            <div class="detail-more-menu">
+              <button type="button" class="detail-more-trigger" onclick="this.parentElement.classList.toggle('open')">⋯</button>
+              <div class="detail-more-dropdown">
+                <button type="button" id="detailAdminInfoBtn" class="hidden" onclick="showAdminPostAuthorInfoFromDetail(event)">查看信息</button>
+                <button type="button" id="deletePostBtn" class="hidden" onclick="deleteCurrentPost()">删除</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <section class="detail-comments-card comments-block" aria-label="评论">
+          <p id="commentLoginHint" class="comment-hint">登录后可发表评论</p>
+
+          <div id="commentInputRow" class="comment-input-row hidden">
+            <div id="replyIndicator" class="reply-indicator hidden">
+              <span class="reply-indicator-text">回复 @</span>
+              <button type="button" class="reply-indicator-cancel" onclick="cancelReply()">×</button>
+            </div>
+            <div id="commentComposerBox" class="comment-compose-box">
+              <div class="textarea-wrap">
+                <textarea id="commentText" rows="1" maxlength="500" placeholder="写评论"></textarea>
+                <button type="button" class="emoji-trigger" onclick="toggleEmojiPicker('commentText')">😊</button>
+              </div>
+              <div id="commentComposerExtras" class="comment-compose-extras hidden">
+                <label class="field-label" for="commentImagesInput">评论图片</label>
+                <input type="file" id="commentImagesInput" class="file-input" accept="image/*" multiple>
+                <div id="commentImagesPreview" class="post-images-preview post-images-preview--comment" aria-live="polite"></div>
+                <div class="comment-compose-actions">
+                  <label class="post-option-label post-option-label--comment">
+                    <input type="checkbox" id="commentAnonymous">
+                    <span>匿名评论</span>
+                  </label>
+                  <button type="button" class="comment-send" onclick="submitComment()">发送评论</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="commentsList" class="comments-list comments-list--page"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="profilePage" class="app-page hidden">
+      <div class="profile-page-wrap">
+        <section class="profile-section" aria-label="我的账号">
+          <div class="profile-section-head" style="display:none">
+            <div>
+              <h2 class="section-title">我的</h2>
+            </div>
+          </div>
+          <div id="profileAccountCard" class="profile-account-card">
+            <p class="insight-empty">登录后可查看账号信息。</p>
+          </div>
+        </section>
+
+        <section class="profile-section" aria-label="功能入口">
+          <div class="profile-section-head" style="display:none">
+            <div>
+              <h2 class="section-title">功能入口</h2>
+            </div>
+          </div>
+          <div class="profile-entry-grid">
+            <button type="button" class="profile-entry-card profile-entry-card--behavior" onclick="openBehaviorPage()">
+              <span class="profile-entry-icon" aria-hidden="true">像</span>
+              <div class="profile-entry-copy">
+                <div class="profile-entry-head">
+                  <h3>行为画像</h3>
+                  <span class="profile-entry-arrow">查看</span>
+                </div>
+                <p id="profileBehaviorEntryHint" style="display:none">查看画像。</p>
+              </div>
+            </button>
+
+            <button type="button" class="profile-entry-card profile-entry-card--dashboard" onclick="openDashboardPage()">
+              <span class="profile-entry-icon" aria-hidden="true">数</span>
+              <div class="profile-entry-copy">
+                <div class="profile-entry-head">
+                  <h3>数据分析</h3>
+                  <span class="profile-entry-arrow">进入</span>
+                </div>
+                <p id="profileDashboardEntryHint" style="display:none">查看分析。</p>
+              </div>
+            </button>
+
+          </div>
+        </section>
+
+        <section id="profileAdminSection" class="profile-admin-section hidden" aria-label="管理员工具">
+          <div class="profile-section-head" style="display:none">
+            <div>
+              <h2 class="section-title">管理员入口</h2>
+            </div>
+          </div>
+
+          <div class="profile-entry-grid profile-entry-grid--admin">
+            <button type="button" class="profile-entry-card profile-entry-card--admin-banner" onclick="openAdminBannerPage()">
+              <span class="profile-entry-icon" aria-hidden="true">播</span>
+              <div class="profile-entry-copy">
+                <div class="profile-entry-head">
+                  <h3>轮播管理</h3>
+                  <span class="profile-entry-arrow">进入</span>
+                </div>
+                <p style="display:none">查看与上传。</p>
+              </div>
+            </button>
+
+            <button type="button" class="profile-entry-card profile-entry-card--admin-announcement" onclick="openAdminAnnouncementPage()">
+              <span class="profile-entry-icon" aria-hidden="true">告</span>
+              <div class="profile-entry-copy">
+                <div class="profile-entry-head">
+                  <h3>公告设置</h3>
+                  <span class="profile-entry-arrow">进入</span>
+                </div>
+                <p style="display:none">单独弹窗公告。</p>
+              </div>
+            </button>
+
+            <button type="button" class="profile-entry-card profile-entry-card--admin-users" onclick="openAdminUserPage()">
+              <span class="profile-entry-icon" aria-hidden="true">禁</span>
+              <div class="profile-entry-copy">
+                <div class="profile-entry-head">
+                  <h3>用户管理</h3>
+                  <span class="profile-entry-arrow">进入</span>
+                </div>
+                <p style="display:none">查询与禁言。</p>
+              </div>
+            </button>
+
+            <button type="button" class="profile-entry-card profile-entry-card--admin-dashboard" onclick="openDashboardPage()">
+              <span class="profile-entry-icon" aria-hidden="true">管</span>
+              <div class="profile-entry-copy">
+                <div class="profile-entry-head">
+                  <h3>管理看板</h3>
+                  <span class="profile-entry-arrow">查看</span>
+                </div>
+                <p style="display:none">查看数据。</p>
+              </div>
+            </button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="profileDetailPage" class="app-page hidden">
+      <div class="dashboard-page-wrap">
+        <div class="dashboard-toolbar">
+          <button type="button" class="dashboard-back-btn" onclick="closeProfileDetailPage()" title="返回"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+        </div>
+        <div class="profile-detail-wrap">
+          <div class="profile-detail-avatar-card">
+            <img id="profileDetailAvatar" class="profile-detail-avatar" src="" alt="">
+            <label class="profile-detail-avatar-btn">
+              更换头像
+              <input type="file" id="profileDetailAvatarInput" accept="image/*" hidden onchange="onProfileAvatarSelected(event)">
+            </label>
+          </div>
+          <div class="profile-detail-list">
+            <div class="profile-detail-row">
+              <span class="profile-detail-label">昵称</span>
+              <span id="profileDetailNickname" class="profile-detail-value">-</span>
+            </div>
+            <div class="profile-detail-row">
+              <span class="profile-detail-label">手机号</span>
+              <span id="profileDetailPhone" class="profile-detail-value">-</span>
+            </div>
+            <div class="profile-detail-row">
+              <span class="profile-detail-label">用户名</span>
+              <span id="profileDetailUsername" class="profile-detail-value">-</span>
+            </div>
+            <div class="profile-detail-row">
+              <span class="profile-detail-label">角色</span>
+              <span id="profileDetailRole" class="profile-detail-value">-</span>
+            </div>
+            <div class="profile-detail-row">
+              <span class="profile-detail-label">状态</span>
+              <span id="profileDetailStatus" class="profile-detail-value">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="dashboardPage" class="app-page hidden">
+      <div class="dashboard-page-wrap">
+        <div class="dashboard-toolbar">
+          <button type="button" class="dashboard-back-btn" onclick="switchTab('profile')" title="返回"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <button type="button" class="dashboard-refresh-btn" onclick="loadPublicDashboardStats(true)" title="刷新"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></button>
+        </div>
+
+        <section class="dashboard-hero">
+          <div>
+            <p class="section-eyebrow">数据分析</p>
+            <h2 class="section-title">论坛数据分析看板</h2>
+            <p class="dashboard-hero-copy">查看活跃度、分布和趋势。</p>
+            <div id="dashboardHeroMeta" class="hero-meta-chips hidden"></div>
+          </div>
+          <div id="dashboardAccessBadge" class="dashboard-access-badge">全体用户可见</div>
+        </section>
+
+        <section id="dashboardSummaryGrid" class="dashboard-summary-grid" aria-label="平台概况">
+          <div class="insight-loading">正在汇总平台数据…</div>
+        </section>
+
+        <section id="dashboardAdminSummary" class="dashboard-admin-summary hidden" aria-label="管理员概览"></section>
+
+        <section id="dashboardChartsGrid" class="dashboard-charts-grid" aria-label="数据图表">
+          <div class="insight-loading">图表生成中…</div>
+        </section>
+      </div>
+    </section>
+
+    <section id="behaviorPage" class="app-page hidden">
+      <div class="dashboard-page-wrap behavior-page-wrap">
+        <div class="dashboard-toolbar">
+          <button type="button" class="dashboard-back-btn" onclick="switchTab('profile')" title="返回"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <button type="button" class="dashboard-refresh-btn" onclick="loadUserBehaviorSummary(true)" title="刷新"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></button>
+        </div>
+
+        <section class="dashboard-hero behavior-hero">
+          <div>
+            <p class="section-eyebrow">行为画像</p>
+            <h2 class="section-title">我的行为画像</h2>
+            <p class="dashboard-hero-copy">查看兴趣偏好和活跃情况。</p>
+            <div id="behaviorHeroMeta" class="hero-meta-chips hidden"></div>
+          </div>
+          <div class="dashboard-access-badge">个人专属画像</div>
+        </section>
+
+        <section id="behaviorInsightsSection" class="insight-section behavior-page-section" aria-label="个人行为画像">
+          
+          <div id="userBehaviorCard" class="insight-card">
+            <p class="insight-empty">登录后可查看你的兴趣画像与互动特征。</p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="contentCenterPage" class="app-page hidden">
+      <div class="dashboard-page-wrap content-center-wrap">
+        <div class="dashboard-toolbar">
+          <button type="button" class="dashboard-back-btn" onclick="switchTab('profile')" title="返回"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <button type="button" class="dashboard-refresh-btn" onclick="refreshContentCenter()" title="刷新"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></button>
+        </div>
+
+        <section class="dashboard-hero content-center-hero">
+          <div>
+            <p class="section-eyebrow">内容中心</p>
+            <h2 class="section-title">我的内容中心</h2>
+            <p class="dashboard-hero-copy">集中查看我的帖子、收到回复、点赞记录、精选内容和站内通知。</p>
+            <div id="contentCenterHeroMeta" class="hero-meta-chips hidden"></div>
+          </div>
+          <div class="dashboard-access-badge">登录后可见</div>
+        </section>
+
+        <section id="contentCenterGuestSection" class="dashboard-card content-center-guest hidden" aria-label="内容中心登录提示">
+          <div class="content-center-guest-copy">
+            <p class="section-eyebrow">内容中心</p>
+            <h3>登录后查看你的帖子与互动</h3>
+            <p>这里会集中展示我的帖子、收到回复、点赞记录、精选内容和站内通知，方便答辩演示完整用户链路。</p>
+          </div>
+          <div class="profile-account-actions">
+            <button type="button" class="profile-primary-btn" onclick="showLogin()">登录</button>
+            <button type="button" class="profile-secondary-btn" onclick="showRegister()">注册</button>
+          </div>
+        </section>
+
+        <section id="contentCenterMain" class="content-center-main hidden" aria-label="内容中心内容">
+          <section id="contentCenterSummaryGrid" class="dashboard-summary-grid" aria-label="内容中心概况">
+            <div class="insight-loading">正在汇总内容中心…</div>
+          </section>
+
+          <section class="dashboard-card content-center-panel" aria-label="内容中心栏目">
+            <div class="content-center-head">
+              <div>
+                <p class="section-eyebrow">内容栏目</p>
+                <h3 class="section-title">常用内容入口</h3>
+              </div>
+              <p id="contentCenterCurrentHint" class="section-desc">按栏目查看你的内容足迹。</p>
+            </div>
+
+            <div id="contentCenterTabs" class="content-center-tabs" role="tablist" aria-label="内容中心栏目切换">
+              <button type="button" class="content-center-tab active" data-tab="myPosts" onclick="setContentCenterTab('myPosts')">我的帖子</button>
+              <button type="button" class="content-center-tab" data-tab="myReplies" onclick="setContentCenterTab('myReplies')">收到回复</button>
+              <button type="button" class="content-center-tab" data-tab="likedPosts" onclick="setContentCenterTab('likedPosts')">点赞过</button>
+              <button type="button" class="content-center-tab" data-tab="featuredPosts" onclick="setContentCenterTab('featuredPosts')">精选</button>
+              <button type="button" class="content-center-tab" data-tab="notifications" onclick="setContentCenterTab('notifications')">站内通知</button>
+            </div>
+
+            <div id="contentCenterList" class="content-center-list">
+              <div class="insight-loading">内容加载中…</div>
+            </div>
+          </section>
+        </section>
+      </div>
+    </section>
+
+    <section id="adminBannerPage" class="app-page hidden">
+      <div class="dashboard-page-wrap admin-page-wrap">
+        <div class="dashboard-toolbar">
+          <button type="button" class="dashboard-back-btn" onclick="switchTab('profile')" title="返回"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <button type="button" class="dashboard-refresh-btn" onclick="loadAdminBannerPanel()" title="刷新"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></button>
+        </div>
+
+        <section class="dashboard-hero admin-hero admin-hero--banner">
+          <div>
+            <p class="section-eyebrow">轮播管理</p>
+            <h2 class="section-title">轮播管理</h2>
+            <p class="dashboard-hero-copy">管理首页轮播图。</p>
+            <div id="adminBannerHeroMeta" class="hero-meta-chips hidden"></div>
+          </div>
+          <div class="dashboard-access-badge">管理员专用</div>
+        </section>
+
+        <section class="admin-manage-grid" aria-label="轮播管理内容">
+          <div class="profile-admin-card admin-manage-card admin-manage-card--branding">
+            <div class="section-head admin-page-head">
+              <div>
+                <p class="section-eyebrow">论坛图标</p>
+                <h3 class="section-title">头部图标设置</h3>
+              </div>
+              <p class="section-desc">可改左上角图标。</p>
+            </div>
+            <div class="admin-branding-preview">
+              <div id="adminBrandingPreviewLogo" class="header-logo admin-branding-logo" aria-hidden="true">
+                <span id="adminBrandingPreviewText" class="header-logo-text">通</span>
+                <img id="adminBrandingPreviewImage" class="header-logo-image hidden" alt="">
+              </div>
+              <div class="admin-branding-copy">
+                <strong>当前论坛图标</strong>
+                <p>支持输入文字图标，或直接上传一张图片作为论坛角标。</p>
+              </div>
+            </div>
+            <label class="field-label" for="brandingLogoText">文字图标</label>
+            <input type="text" id="brandingLogoText" placeholder="例如：通" maxlength="2">
+            <label class="field-label" for="brandingLogoFile">或上传图标图片</label>
+            <input type="file" id="brandingLogoFile" class="file-input" accept="image/*">
+            <div class="admin-branding-actions">
+              <button type="button" class="btn-admin-add" onclick="adminSaveBranding()">保存图标</button>
+              <button type="button" class="profile-secondary-btn admin-branding-reset" onclick="adminResetBranding()">恢复默认</button>
+            </div>
+          </div>
+
+          <div class="profile-admin-card admin-manage-card">
+            <div class="section-head admin-page-head">
+              <div>
+                <p class="section-eyebrow">当前轮播</p>
+                <h3 class="section-title">当前轮播</h3>
+              </div>
+              <p class="section-desc">查看与删除。</p>
+            </div>
+            <div id="adminBannerList" class="admin-banner-list"></div>
+          </div>
+
+          <div class="profile-admin-card admin-manage-card">
+            <div class="section-head admin-page-head">
+              <div>
+                <p class="section-eyebrow">新增轮播</p>
+                <h3 class="section-title">新增轮播</h3>
+              </div>
+              <p class="section-desc">支持链接或上传。</p>
+            </div>
+            <label class="field-label" for="newBannerTitle">新轮播标题</label>
+            <input type="text" id="newBannerTitle" placeholder="标题" maxlength="50">
+            <label class="field-label" for="newBannerImageUrl">图片地址（http 或 /uploads/…）</label>
+            <input type="text" id="newBannerImageUrl" placeholder="https://… 或先上传后自动填入">
+            <label class="field-label" for="newBannerImageFile">或上传图片</label>
+            <input type="file" id="newBannerImageFile" class="file-input" accept="image/*">
+            <label class="field-label" for="newBannerLink">点击跳转链接（可选）</label>
+            <input type="text" id="newBannerLink" placeholder="https://…">
+            <label class="field-label" for="newBannerSort">排序（数字越小越靠前）</label>
+            <input type="number" id="newBannerSort" value="0" step="1">
+            <button type="button" class="btn-admin-add" onclick="adminAddBanner()">添加轮播</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="adminUserPage" class="app-page hidden">
+      <div class="dashboard-page-wrap admin-page-wrap">
+        <div class="dashboard-toolbar">
+          <button type="button" class="dashboard-back-btn" onclick="switchTab('profile')" title="返回"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <button type="button" class="dashboard-refresh-btn" onclick="adminSearchUsers(true)" title="刷新"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></button>
+        </div>
+
+        <section class="dashboard-hero admin-hero admin-hero--users">
+          <div>
+            <p class="section-eyebrow">用户管理</p>
+            <h2 class="section-title">用户管理</h2>
+            <p class="dashboard-hero-copy">查询账号并管理禁言。</p>
+            <div id="adminUserHeroMeta" class="hero-meta-chips hidden"></div>
+          </div>
+          <div class="dashboard-access-badge">管理员专用</div>
+        </section>
+
+        <section class="admin-manage-grid admin-manage-grid--users" aria-label="用户管理内容">
+          <div class="profile-admin-card admin-manage-card">
+            <div class="section-head admin-page-head">
+              <div>
+                <p class="section-eyebrow">查询账号</p>
+                <h3 class="section-title">查询账号</h3>
+              </div>
+              <p class="section-desc">支持昵称、手机号、用户 ID。</p>
+            </div>
+            <input type="text" id="adminUserKeyword" maxlength="30" placeholder="昵称 / 手机号 / 用户ID">
+            <div class="admin-mute-actions">
+              <button type="button" class="btn-admin-search" onclick="adminSearchUsers()">查询用户</button>
+            </div>
+            <div id="adminUserSearchResults" class="admin-user-results">
+              <p class="admin-muted">请输入关键词后开始检索账号。</p>
+            </div>
+          </div>
+
+          <div class="profile-admin-card admin-manage-card">
+            <div class="section-head admin-page-head">
+              <div>
+                <p class="section-eyebrow">快捷操作</p>
+                <h3 class="section-title">快捷操作</h3>
+              </div>
+              <p class="section-desc">已知手机号可直接处理。</p>
+            </div>
+            <label class="field-label" for="mutePhoneInput">用户手机号</label>
+            <input type="tel" id="mutePhoneInput" maxlength="11" placeholder="请输入 11 位手机号" inputmode="numeric">
+            <div class="admin-mute-actions">
+              <button type="button" class="btn-mute" onclick="adminSetMute(1)">禁言</button>
+              <button type="button" class="btn-unmute" onclick="adminSetMute(0)">解除禁言</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="adminAnnouncementPage" class="app-page hidden">
+      <div class="dashboard-page-wrap admin-page-wrap">
+        <div class="dashboard-toolbar">
+          <button type="button" class="dashboard-back-btn" onclick="switchTab('profile')" title="返回"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <button type="button" class="dashboard-refresh-btn" onclick="loadAdminAnnouncementPanel()" title="刷新"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></button>
+        </div>
+
+        <section class="dashboard-hero admin-hero admin-hero--announcement">
+          <div>
+            <p class="section-eyebrow">公告设置</p>
+            <h2 class="section-title">公告设置</h2>
+            <p class="dashboard-hero-copy">单独维护首页弹窗公告，不再和轮播图混用。</p>
+            <div id="adminAnnouncementHeroMeta" class="hero-meta-chips hidden"></div>
+          </div>
+          <div class="dashboard-access-badge">管理员专用</div>
+        </section>
+
+        <section class="admin-manage-grid admin-manage-grid--announcement" aria-label="公告设置内容">
+          <div class="profile-admin-card admin-manage-card">
+            <div class="section-head admin-page-head">
+              <div>
+                <p class="section-eyebrow">编辑公告</p>
+                <h3 class="section-title">编辑公告</h3>
+              </div>
+              <p class="section-desc">支持标题、正文、图片和跳转链接。</p>
+            </div>
+
+            <label class="post-option-label post-option-label--comment admin-toggle-row">
+              <input type="checkbox" id="adminAnnouncementEnabled">
+              <span>启用首页弹窗公告</span>
+            </label>
+            <label class="field-label" for="adminAnnouncementTitle">公告标题</label>
+            <input type="text" id="adminAnnouncementTitle" placeholder="例如：校园通知" maxlength="50">
+            <label class="field-label" for="adminAnnouncementBody">公告正文</label>
+            <textarea id="adminAnnouncementBody" rows="5" maxlength="500" placeholder="填写要展示给全体用户的公告内容"></textarea>
+            <label class="field-label" for="adminAnnouncementLink">跳转链接（可选）</label>
+            <input type="text" id="adminAnnouncementLink" placeholder="https://... 或站内 / 路径">
+            <label class="field-label" for="adminAnnouncementImageUrl">公告图片地址（可选）</label>
+            <input type="text" id="adminAnnouncementImageUrl" placeholder="https://... 或上传后自动填入">
+            <label class="field-label" for="adminAnnouncementImageFile">或上传公告图片</label>
+            <input type="file" id="adminAnnouncementImageFile" class="file-input" accept="image/*">
+            <div class="admin-branding-actions">
+              <button type="button" class="btn-admin-add" onclick="adminSaveAnnouncement()">保存公告</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="底部导航">
+    <div class="bottom-nav-inner">
+      <button type="button" class="bottom-nav-item active" data-tab="home" onclick="switchTab('home')">
+        <span class="bottom-nav-glyph">⌂</span>
+        <span class="bottom-nav-text">首页</span>
+      </button>
+      <button type="button" class="bottom-nav-publish" onclick="checkAuthAndPost()">
+        <span class="bottom-nav-plus">+</span>
+        <span class="bottom-nav-text">发布</span>
+      </button>
+      <button type="button" class="bottom-nav-item" data-tab="profile" onclick="switchTab('profile')">
+        <span class="bottom-nav-glyph">◉</span>
+        <span class="bottom-nav-text">我的</span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="modal hidden" id="postModal" role="dialog" aria-modal="true" aria-labelledby="postModalTitle" onclick="modalBackdropClick(event, 'postModal')">
+    <div class="modal-content modal-content-wide" onclick="event.stopPropagation()">
+      <h3 id="postModalTitle">发布帖子</h3>
+
+      <div class="textarea-wrap">
+        <textarea id="postContent" placeholder="正文（可仅发图）" maxlength="2000"></textarea>
+        <button type="button" class="emoji-trigger" onclick="toggleEmojiPicker('postContent')">😊</button>
+      </div>
+      <label class="field-label" for="postImagesInput">图片（最多 9 张，单张 ≤5MB）</label>
+      <input type="file" id="postImagesInput" class="file-input" accept="image/*" multiple>
+      <div id="postImagesPreview" class="post-images-preview" aria-live="polite"></div>
+      <label class="post-option-label">
+        <input type="checkbox" id="postAnonymous">
+        <span>匿名发布</span>
+      </label>
+      <div class="modal-actions">
+        <button type="button" onclick="submitPost()">发布</button>
+        <button type="button" class="cancel" onclick="closeModal('postModal')">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle" onclick="modalBackdropClick(event, 'loginModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h3 id="loginModalTitle">登录</h3>
+      <input type="tel" id="loginPhone" placeholder="手机号" maxlength="11" inputmode="numeric" autocomplete="tel">
+      <input type="password" id="loginPassword" placeholder="密码" autocomplete="current-password">
+      <div class="modal-actions">
+        <button type="button" onclick="login()">登录</button>
+        <button type="button" class="cancel" onclick="closeModal('loginModal')">取消</button>
+      </div>
+      <p class="switch-mode">没有账号？<a href="#" onclick="event.preventDefault(); showRegister();">立即注册</a></p>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="registerModal" role="dialog" aria-modal="true" aria-labelledby="registerModalTitle" onclick="modalBackdropClick(event, 'registerModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h3 id="registerModalTitle">注册</h3>
+      <input type="tel" id="regPhone" placeholder="手机号（11 位）" maxlength="11" inputmode="numeric" autocomplete="tel">
+      <input type="password" id="regPassword" placeholder="密码（至少 6 位）" autocomplete="new-password">
+      <input type="text" id="regNickname" placeholder="昵称（必填）" maxlength="30">
+      <div class="modal-actions">
+        <button type="button" onclick="register()">注册</button>
+        <button type="button" class="cancel" onclick="closeModal('registerModal')">取消</button>
+      </div>
+      <p class="switch-mode">已有账号？<a href="#" onclick="event.preventDefault(); showLogin();">立即登录</a></p>
+    </div>
+  </div>
+
+  <div class="modal hidden image-viewer-modal" id="imageViewerModal" role="dialog" aria-modal="true" onclick="modalBackdropClick(event, 'imageViewerModal')">
+    <div class="image-viewer-shell" onclick="event.stopPropagation()">
+      <div class="image-viewer-topbar">
+        <div id="imageViewerCaption" class="image-viewer-caption"></div>
+        <button type="button" class="image-viewer-close" aria-label="关闭图片预览" onclick="closeModal('imageViewerModal')">×</button>
+      </div>
+      <div id="imageViewerStage" class="image-viewer-stage">
+        <img id="imageViewerImage" src="" alt="预览图片" class="image-viewer-image">
+      </div>
+      <p id="imageViewerHint" class="image-viewer-hint">双击可放大，双指可缩放，多图支持左右滑动切换</p>
+    </div>
+  </div>
+
+  <div class="modal hidden announcement-modal" id="announcementModal" role="dialog" aria-modal="true" aria-labelledby="announcementModalTitle" onclick="modalBackdropClick(event, 'announcementModal')">
+    <div class="modal-content announcement-modal-content" onclick="event.stopPropagation()">
+      <button type="button" class="announcement-close-btn" aria-label="关闭公告" onclick="closeModal('announcementModal')">×</button>
+      <p class="announcement-eyebrow">站内公告</p>
+      <h3 id="announcementModalTitle">校园公告</h3>
+      <p id="announcementModalDesc" class="announcement-desc">请留意最新公告内容。</p>
+      <div id="announcementModalMedia" class="announcement-media hidden">
+        <img id="announcementModalImage" src="" alt="公告图片" loading="lazy" decoding="async">
+      </div>
+      <div class="modal-actions announcement-actions">
+        <button type="button" id="announcementModalPrimaryBtn" onclick="handleAnnouncementPrimaryAction()">查看详情</button>
+        <button type="button" class="cancel" onclick="closeModal('announcementModal')">关闭公告</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal hidden admin-post-info-modal" id="adminPostInfoModal" role="dialog" aria-modal="true" aria-labelledby="adminPostInfoTitle" onclick="modalBackdropClick(event, 'adminPostInfoModal')">
+    <div class="modal-content admin-post-info-content" onclick="event.stopPropagation()">
+      <div class="admin-post-info-head">
+        <div>
+          <p class="announcement-eyebrow admin-post-info-eyebrow">管理员查看</p>
+          <h3 id="adminPostInfoTitle">帖子作者信息</h3>
+        </div>
+        <button type="button" class="announcement-close-btn admin-post-info-close" aria-label="关闭作者信息" onclick="closeModal('adminPostInfoModal')">×</button>
+      </div>
+      <div id="adminPostInfoBody" class="admin-post-info-body">
+        <p class="admin-post-info-loading">正在读取信息…</p>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
+    <script>
+      const THUMB_SM='<svg class="thumb-svg" viewBox="0 0 24 24" width="16" height="16"><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3m5-3V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3L14 5z"/></svg>';
+      const THUMB='<svg class="thumb-svg" viewBox="0 0 24 24" width="22" height="22"><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3m5-3V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3L14 5z"/></svg>';
+    </script>
+    <script defer src="js/api.js?v=20260502-notitle1"></script>
+    <script defer src="js/app.v2.js?v=2"></script>
+    <div id="emojiPicker" class="emoji-picker hidden"></div>
+</body>
+</html>
+
